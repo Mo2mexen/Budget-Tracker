@@ -15,7 +15,7 @@ A desktop application for managing personal finances built with Java, JavaFX, an
 - **File Export**: CSV & JSON
 
 ## Project Structure
-
+ ```
 BudgetTracker/
 ├── src/
 │   ├── models/
