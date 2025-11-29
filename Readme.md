@@ -61,6 +61,6 @@ BudgetTracker/
 
 ## Development Phases
 - **Phase 1**: Core classes (User, Account, Category, Transaction, Budget, Goal)
-- **Phase 2**: FileManager (CSV/JSON export/import)
+- **Phase 2**: FileManager (CSV/JSON export/import) 
 - **Phase 3**: DatabaseManager (MySQL CRUD operations)
 - **Phase 4**: JavaFX GUI (login, dashboard, charts)
