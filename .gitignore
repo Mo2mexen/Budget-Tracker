@@ -20,3 +20,8 @@ Thumbs.db
 # Java
 *.jar
 !lib/*.jar
+
+# Database configuration (contains passwords!)
+database.properties
+*.properties
+!database.properties.example
