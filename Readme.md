@@ -36,7 +36,7 @@ BudgetTracker/
 │   └── mysql-connector-java-8.0.33.jar
 └── database/
     └── schema.sql
-
+ ```
 
 ## Database Schema
 - **users**: User accounts and profiles
