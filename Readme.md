@@ -5,38 +5,39 @@ A desktop application for managing personal finances built with Java, JavaFX, an
 - Track income and expenses across multiple accounts
 - Set monthly budgets and monitor spending
 - Create and track savings goals
-- Export data to CSV/JSON
+- **Export data to CSV/JSON files using Gson and Apache Commons CSV libraries**
 - Visual reports with charts
 
 ## Technology Stack
 - **Backend**: Java (OOP)
 - **GUI**: JavaFX
 - **Database**: MySQL
-- **File Export**: CSV & JSON
+- **Libraries**: 
+  - **Gson 2.10.1** - Converts Java objects to JSON for data backup
+  - **Apache Commons CSV 1.10.0** - Creates CSV files that open in Excel
 
 ## Project Structure
- ```
+```
 BudgetTracker/
-├── src/
-│   ├── models/
-│   │   ├── User.java
-│   │   ├── Account.java
-│   │   ├── Category.java
-│   │   ├── Transaction.java
-│   │   ├── Budget.java
-│   │   └── Goal.java
-│   ├── utils/
-│   │   └── FileManager.java
-│   ├── database/
-│   │   └── DatabaseManager.java
-│   ├── controllers/
-│   │   └── DashboardController.java
-│   └── Main.java
+├── models/
+│   ├── User.java
+│   ├── Account.java
+│   ├── Category.java
+│   ├── Transaction.java
+│   ├── Budget.java
+│   └── Goal.java
+├── utils/
+│   └── FileManager.java
 ├── lib/
-│   └── mysql-connector-java-8.0.33.jar
-└── database/
-    └── schema.sql
- ```
+│   ├── gson-2.10.1.jar
+│   └── commons-csv-1.10.0.jar
+├── reports/                    ← Auto-generated exports
+│   ├── transactions_*.csv
+│   ├── budgets_*.csv
+│   ├── goals_*.csv
+│   └── backup_*.json
+└── TestFileManager.java
+```
 
 ## Database Schema
 - **users**: User accounts and profiles
@@ -46,10 +47,17 @@ BudgetTracker/
 - **budgets**: Monthly spending limits
 - **goals**: Savings goals with progress tracking
 
-### Database Setup
+## Database Setup
 1. Install MySQL
 2. Create database: `CREATE DATABASE budget_tracker;`
 3. Run `database/schema.sql`
+
+## File Export Feature
+FileManager uses two external libraries to export data:
+- **Gson** - Automatically converts all user data to JSON format for complete backup
+- **Apache Commons CSV** - Generates CSV files that can be opened directly in Excel
+
+All exports are saved in the `reports/` folder with timestamps.
 
 ## Usage Flow
 1. Login with username/password
@@ -58,10 +66,5 @@ BudgetTracker/
 4. Record transactions
 5. Set monthly budgets
 6. Track savings goals
-7. View reports and export data
+7. Export to CSV/JSON from reports folder
 
-## Development Phases
-- **Phase 1**: Core classes (User, Account, Category, Transaction, Budget, Goal)
-- **Phase 2**: FileManager (CSV/JSON export/import) 
-- **Phase 3**: DatabaseManager (MySQL CRUD operations)
-- **Phase 4**: JavaFX GUI (login, dashboard, charts)
