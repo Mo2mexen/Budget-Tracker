@@ -1,8 +1,8 @@
 import database.*;
-import models.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
+import models.*;
 
 public class Main {
 
