@@ -1,8 +1,6 @@
 package models;
 
-public class Budget {
-    private int id;
-    private int userId;
+public class Budget extends BaseEntity implements Calculable, Displayable {
     private int categoryId;
     private double monthlyLimit;
     private int month;
@@ -10,8 +8,7 @@ public class Budget {
     private double currentSpent;
 
     public Budget(int id, int userId, int categoryId, double monthlyLimit, int month, int year) {
-        this.id = id;
-        this.userId = userId;
+        super(id, userId);
         this.categoryId = categoryId;
         this.monthlyLimit = monthlyLimit;
         this.month = month;
@@ -19,13 +16,40 @@ public class Budget {
         this.currentSpent = 0.0;
     }
 
-    public double getRemainingAmount() {
+    @Override
+    public double calculateTotal() {
+        return monthlyLimit;
+    }
+
+    @Override
+    public double calculateRemaining() {
         return monthlyLimit - currentSpent;
     }
 
-    public double getSpentPercentage() {
+    @Override
+    public double calculatePercentage() {
         if (monthlyLimit == 0) return 0;
         return (currentSpent / monthlyLimit) * 100;
+    }
+
+    @Override
+    public String getFormattedDisplay() {
+        return String.format("Budget %d/%d: $%.2f / $%.2f (%s)",
+                           month, year, currentSpent, monthlyLimit, getStatus());
+    }
+
+    @Override
+    public void printDetails() {
+        System.out.println("Budget Details:");
+        System.out.println("Period: " + month + "/" + year);
+        System.out.println("Limit: $" + monthlyLimit);
+        System.out.println("Spent: $" + currentSpent);
+        System.out.println("Status: " + getStatus());
+    }
+
+    @Override
+    public String getDisplayInfo() {
+        return "Budget for " + month + "/" + year + " - " + getStatus();
     }
 
     public boolean isOverBudget() {
@@ -33,7 +57,7 @@ public class Budget {
     }
 
     public boolean isNearLimit() {
-        return getSpentPercentage() >= 80;
+        return calculatePercentage() >= 80;
     }
 
     public void addExpense(double amount) {
@@ -44,22 +68,6 @@ public class Budget {
         if (isOverBudget()) return "OVER";
         if (isNearLimit()) return "WARNING";
         return "GOOD";
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public int getCategoryId() {
@@ -104,7 +112,6 @@ public class Budget {
 
     @Override
     public String toString() {
-        return String.format("Budget %d/%d: $%.2f / $%.2f (%s)", 
-                           month, year, currentSpent, monthlyLimit, getStatus());
+        return getFormattedDisplay();
     }
 }

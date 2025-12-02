@@ -1,68 +1,64 @@
 # Budget Tracker
-A desktop application for managing personal finances built with pure Java and MySQL.
 
-## Features
-- Track income and expenses across multiple accounts
-- Set monthly budgets and monitor spending
-- Create and track savings goals
-- Export data to Excel-compatible CSV files
+A personal finance management application built with Java and MySQL.
 
+## Overview
+
+Budget Tracker helps users manage their finances by tracking income, expenses, budgets, and savings goals. The application uses a MySQL database for persistent storage and will feature a GUI interface.
 
 ## Technology Stack
-- **Backend**: Java (OOP)
-- **GUI**: JavaFX
-- **Database**: MySQL
 
+- **Language**: Java
+- **Database**: MySQL
+- **GUI**: JavaFX (to be implemented in gui/ folder)
 
 ## Project Structure
+
 ```
-BudgetTracker/
+Budget-Tracker/
 ├── src/
-│   ├── models/
+│   ├── Main.java                  # Application entry point
+│   ├── models/                    # Data models
 │   │   ├── User.java
 │   │   ├── Account.java
 │   │   ├── Category.java
 │   │   ├── Transaction.java
 │   │   ├── Budget.java
 │   │   └── Goal.java
-│   ├── utils/
-│   │   └── FileManager.java
-│   └── database/
-│       └── DatabaseManager.java
-├── bin/                    (compiled classes)
-├── reports/                (auto-created folder)
-│   ├── transactions_*.csv
-│   ├── budgets_*.csv
-│   ├── goals_*.csv
-│   └── complete_report_*.csv
-└── database/
-    └── schema.sql
+│   ├── database/                  # Database layer
+│   │   ├── DatabaseConnection.java
+│   │   ├── UserDAO.java
+│   │   ├── AccountDAO.java
+│   │   ├── CategoryDAO.java
+│   │   ├── TransactionDAO.java
+│   │   ├── BudgetDAO.java
+│   │   ├── GoalDAO.java
+│   │   ├── schema.sql
+│   │   └── sample_data.sql
+│   ├── utils/                     # Utility classes
+│   │   └── FileManager.java       # CSV export functionality
+│   └── gui/                       # GUI components 
+└── reports/                       # Generated CSV exports
 ```
 
 ## Database Schema
-- **users**: User accounts and profiles
-- **accounts**: Bank accounts (checking, savings, cash, credit)
-- **categories**: Income/expense categories
-- **transactions**: All financial transactions
-- **budgets**: Monthly spending limits
-- **goals**: Savings goals with progress tracking
 
-## File Export Feature
-Through the GUI, users can export their data to CSV files that open directly in Excel:
-- **Transactions Export** → `transactions_29_11_2025.csv`
-- **Budgets Export** → `budgets_29_11_2025.csv`
-- **Goals Export** → `goals_29_11_2025.csv`
-- **Complete Report** → `complete_report_29_11_2025.csv` (all data combined)
-All files are automatically saved in the `reports/` folder with the current date.
-Files contain raw data only - charts are displayed in the GUI application.
+Six main tables:
+- **users** - User accounts and authentication
+- **accounts** - Bank accounts (checking, savings, cash, credit card)
+- **categories** - Income and expense categories
+- **transactions** - Financial transactions
+- **budgets** - Monthly spending limits per category
+- **goals** - Savings goals with progress tracking
 
-## Usage Flow
-1. Login with username/password
-2. Add accounts (checking, savings, etc.)
-3. Create categories (Food, Transport, Salary)
-4. Record transactions
-5. Set monthly budgets
-6. Track savings goals
-7. View visual charts in GUI
-8. Export selected data to Excel via GUI buttons
+## Features
+
+- User authentication (login/register)
+- Multiple account management
+- Transaction tracking (income/expense)
+- Budget monitoring
+- Savings goal tracking
+- Monthly financial reports
+- CSV export functionality
+
 
