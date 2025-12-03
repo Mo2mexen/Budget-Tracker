@@ -10,7 +10,7 @@ Budget Tracker helps users manage their finances by tracking income, expenses, b
 
 - **Language**: Java
 - **Database**: MySQL
-- **GUI**: JavaFX (to be implemented in gui/ folder)
+- **GUI**: JavaFX 
 
 ## Project Structure
 
@@ -22,7 +22,6 @@ Budget-Tracker/
 │   │   ├── BaseEntity.java        # Abstract parent class
 │   │   ├── Calculable.java        # Interface for calculations
 │   │   ├── Displayable.java       # Interface for display
-│   │   ├── FinancialContainer.java # Generic container
 │   │   ├── User.java
 │   │   ├── Account.java
 │   │   ├── Category.java
@@ -54,17 +53,6 @@ Six main tables:
 - **transactions** - Financial transactions
 - **budgets** - Monthly spending limits per category
 - **goals** - Savings goals with progress tracking
-
-## OOP Design
-
-The project demonstrates core object-oriented programming principles:
-
-- **Encapsulation** - Private fields with getters/setters in all model classes
-- **Inheritance** - BaseEntity abstract class extended by Budget and Goal
-- **Polymorphism** - Overridden methods (toString, getDisplayInfo, calculatePercentage)
-- **Abstraction** - Abstract class (BaseEntity) and interfaces (Calculable, Displayable)
-- **Generics** - FinancialContainer<T> for type-safe collections
-- **Interfaces** - Calculable for financial calculations, Displayable for output formatting
 
 ## Features
 

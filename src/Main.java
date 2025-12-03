@@ -1,5 +1,6 @@
 import database.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import models.*;
@@ -8,8 +9,8 @@ public class Main {
 
     private static Scanner scanner = new Scanner(System.in);
     private static User currentUser = null;
-    private static FinancialContainer<Budget> budgetContainer = new FinancialContainer<>("Budgets");
-    private static FinancialContainer<Goal> goalContainer = new FinancialContainer<>("Goals");
+    private static List<Budget> budgets = new ArrayList<>();
+    private static List<Goal> goals = new ArrayList<>();
 
     public static void main(String[] args) {
         System.out.println("BUDGET TRACKER");
@@ -74,18 +75,8 @@ public class Main {
     }
 
     private static void loadUserData() {
-        budgetContainer.clear();
-        goalContainer.clear();
-
-        List<Budget> budgets = BudgetDAO.getUserBudgets(currentUser.getId());
-        for (Budget b : budgets) {
-            budgetContainer.addItem(b);
-        }
-
-        List<Goal> goals = GoalDAO.getUserGoals(currentUser.getId());
-        for (Goal g : goals) {
-            goalContainer.addItem(g);
-        }
+        budgets = BudgetDAO.getUserBudgets(currentUser.getId());
+        goals = GoalDAO.getUserGoals(currentUser.getId());
     }
 
     private static void showDashboard() {
@@ -192,10 +183,18 @@ public class Main {
 
     private static void viewBudgets() {
         System.out.println("\n--- BUDGETS ---");
-        budgetContainer.displayAll();
+
+        if (budgets.isEmpty()) {
+            System.out.println("No budgets found");
+            return;
+        }
+
+        for (Budget b : budgets) {
+            System.out.println(b.getDisplayInfo());
+        }
 
         System.out.println("\nDetailed view:");
-        for (Budget b : budgetContainer.getAllItems()) {
+        for (Budget b : budgets) {
             System.out.println("Progress: " + b.calculatePercentage() + "%");
             System.out.println("Remaining: $" + b.calculateRemaining());
             b.printDetails();
@@ -205,10 +204,18 @@ public class Main {
 
     private static void viewGoals() {
         System.out.println("\n--- GOALS ---");
-        goalContainer.displayAll();
+
+        if (goals.isEmpty()) {
+            System.out.println("No goals found");
+            return;
+        }
+
+        for (Goal g : goals) {
+            System.out.println(g.getDisplayInfo());
+        }
 
         System.out.println("\nDetailed view:");
-        for (Goal g : goalContainer.getAllItems()) {
+        for (Goal g : goals) {
             System.out.println("Progress: " + g.calculatePercentage() + "%");
             System.out.println("Remaining: $" + g.calculateRemaining());
             g.printDetails();
