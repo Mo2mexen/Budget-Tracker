@@ -1,28 +1,21 @@
 package models;
 
-import java.time.LocalDate;
-
-public class Account {
-    private int id;
-    private int userId;
+public class Account extends BaseEntity implements Displayable {
     private String accountName;
     private AccountType accountType;
     private double balance;
     private String currency;
-    private LocalDate createdDate;
 
     public enum AccountType {
         CHECKING, SAVINGS, CASH, CREDIT_CARD
     }
 
     public Account(int id, int userId, String accountName, AccountType accountType, double balance, String currency) {
-        this.id = id;
-        this.userId = userId;
+        super(id, userId);
         this.accountName = accountName;
         this.accountType = accountType;
         this.balance = balance;
         this.currency = currency;
-        this.createdDate = LocalDate.now();
     }
 
     public boolean deposit(double amount) {
@@ -53,20 +46,23 @@ public class Account {
         return currency + " " + String.format("%.2f", balance);
     }
 
-    public int getId() {
-        return id;
+    @Override
+    public String getDisplayInfo() {
+        return accountName + " (" + accountType + "): " + getFormattedBalance();
     }
 
-    public void setId(int id) {
-        this.id = id;
+    @Override
+    public String getFormattedDisplay() {
+        return getDisplayInfo();
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
+    @Override
+    public void printDetails() {
+        System.out.println("Account Details:");
+        System.out.println("Name: " + accountName);
+        System.out.println("Type: " + accountType);
+        System.out.println("Balance: " + getFormattedBalance());
+        System.out.println("Created: " + getCreatedDate());
     }
 
     public String getAccountName() {
@@ -99,14 +95,6 @@ public class Account {
 
     public void setCurrency(String currency) {
         this.currency = currency;
-    }
-
-    public LocalDate getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDate createdDate) {
-        this.createdDate = createdDate;
     }
 
     @Override

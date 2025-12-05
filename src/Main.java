@@ -83,17 +83,6 @@ public class Main {
     private static void showDashboard() {
         while (true) {
             System.out.println("\n--- DASHBOARD ---");
-            System.out.println("Welcome, " + currentUser.getFullName());
-
-            double income = TransactionDAO.getTotalIncome(currentUser.getId());
-            double expenses = TransactionDAO.getTotalExpenses(currentUser.getId());
-            double balance = income - expenses;
-
-            System.out.println("Income:   " + currentUser.getFormattedCurrency(income));
-            System.out.println("Expenses: " + currentUser.getFormattedCurrency(expenses));
-            System.out.println("Balance:  " + currentUser.getFormattedCurrency(balance));
-            System.out.println();
-
             System.out.println("1. Add Transaction");
             System.out.println("2. View Transactions");
             System.out.println("3. Monthly Report");
@@ -105,6 +94,7 @@ public class Main {
             System.out.print("Choice: ");
 
             int choice = getInt();
+
             if (choice == 1) addTransaction();
             else if (choice == 2) viewTransactions();
             else if (choice == 3) monthlyReport();

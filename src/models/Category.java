@@ -3,9 +3,7 @@ package models;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Category {
-    private int id;
-    private int userId;
+public class Category extends BaseEntity implements Displayable {
     private String categoryName;
     private CategoryType type;
     private String color;
@@ -17,8 +15,7 @@ public class Category {
     }
 
     public Category(int id, int userId, String categoryName, CategoryType type, String color, String icon, boolean isDefault) {
-        this.id = id;
-        this.userId = userId;
+        super(id, userId);
         this.categoryName = categoryName;
         this.type = type;
         this.color = color;
@@ -46,20 +43,26 @@ public class Category {
         return defaults;
     }
 
-    public int getId() {
-        return id;
+    @Override
+    public String getDisplayInfo() {
+        return icon + " " + categoryName + " (" + type + ")";
     }
 
-    public void setId(int id) {
-        this.id = id;
+    @Override
+    public String getFormattedDisplay() {
+        return String.format("%s %s [%s] - %s",
+                icon, categoryName, type, isDefault ? "Default" : "Custom");
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
+    @Override
+    public void printDetails() {
+        System.out.println("Category Details:");
+        System.out.println("Name: " + categoryName);
+        System.out.println("Type: " + type);
+        System.out.println("Icon: " + icon);
+        System.out.println("Color: " + color);
+        System.out.println("Default: " + (isDefault ? "Yes" : "No"));
+        System.out.println("Created: " + getCreatedDate());
     }
 
     public String getCategoryName() {

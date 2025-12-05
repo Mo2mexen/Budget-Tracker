@@ -4,9 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class Transaction {
-    private int id;
-    private int userId;
+public class Transaction extends BaseEntity implements Displayable {
     private int accountId;
     private int categoryId;
     private double amount;
@@ -20,10 +18,9 @@ public class Transaction {
         INCOME, EXPENSE, TRANSFER
     }
 
-    public Transaction(int id, int userId, int accountId, int categoryId, double amount, 
+    public Transaction(int id, int userId, int accountId, int categoryId, double amount,
                       String description, LocalDate transactionDate, TransactionType type, String notes) {
-        this.id = id;
-        this.userId = userId;
+        super(id, userId);
         this.accountId = accountId;
         this.categoryId = categoryId;
         this.amount = amount;
@@ -55,20 +52,31 @@ public class Transaction {
         return transactionDate.getMonthValue() == month && transactionDate.getYear() == year;
     }
 
-    public int getId() {
-        return id;
+    @Override
+    public String getDisplayInfo() {
+        return transactionDate + " - " + description + ": " + getFormattedAmount();
     }
 
-    public void setId(int id) {
-        this.id = id;
+    @Override
+    public String getFormattedDisplay() {
+        return String.format("[%s] %s - %s: %s (%s)",
+                transactionDate, type, description, getFormattedAmount(),
+                notes != null && !notes.isEmpty() ? notes : "No notes");
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
+    @Override
+    public void printDetails() {
+        System.out.println("Transaction Details:");
+        System.out.println("Date: " + transactionDate);
+        System.out.println("Type: " + type);
+        System.out.println("Description: " + description);
+        System.out.println("Amount: " + getFormattedAmount());
+        System.out.println("Account ID: " + accountId);
+        System.out.println("Category ID: " + categoryId);
+        if (notes != null && !notes.isEmpty()) {
+            System.out.println("Notes: " + notes);
+        }
+        System.out.println("Created: " + createdAt);
     }
 
     public int getAccountId() {
