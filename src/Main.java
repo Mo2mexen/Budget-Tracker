@@ -254,7 +254,7 @@ public class Main {
             }
             String filePath = FileManager.exportTransactions(transactions);
             if (filePath != null) {
-                System.out.println("Exported " + transactions.size() + " transactions to: " + filePath);
+                System.out.println("Exported transactions to: " + filePath);
                 System.out.print("Open file? (y/n): ");
                 String open = scanner.nextLine();
                 if (open.equalsIgnoreCase("y")) {
@@ -268,7 +268,7 @@ public class Main {
             }
             String filePath = FileManager.exportBudgets(budgets);
             if (filePath != null) {
-                System.out.println("Exported " + budgets.size() + " budgets to: " + filePath);
+                System.out.println("Exported budgets to: " + filePath);
                 System.out.print("Open file? (y/n): ");
                 String open = scanner.nextLine();
                 if (open.equalsIgnoreCase("y")) {
@@ -282,7 +282,7 @@ public class Main {
             }
             String filePath = FileManager.exportGoals(goals);
             if (filePath != null) {
-                System.out.println("Exported " + goals.size() + " goals to: " + filePath);
+                System.out.println("Exported goals to: " + filePath);
                 System.out.print("Open file? (y/n): ");
                 String open = scanner.nextLine();
                 if (open.equalsIgnoreCase("y")) {
@@ -290,33 +290,25 @@ public class Main {
                 }
             }
         } else if (choice == 4) {
-            int exported = 0;
             List<Transaction> transactions = TransactionDAO.getUserTransactions(currentUser.getId());
-            if (!transactions.isEmpty()) {
-                String filePath = FileManager.exportTransactions(transactions);
-                if (filePath != null) {
-                    System.out.println("Exported transactions to: " + filePath);
-                    exported++;
-                }
-            }
-            if (!budgets.isEmpty()) {
-                String filePath = FileManager.exportBudgets(budgets);
-                if (filePath != null) {
-                    System.out.println("Exported budgets to: " + filePath);
-                    exported++;
-                }
-            }
-            if (!goals.isEmpty()) {
-                String filePath = FileManager.exportGoals(goals);
-                if (filePath != null) {
-                    System.out.println("Exported goals to: " + filePath);
-                    exported++;
-                }
-            }
-            if (exported > 0) {
-                System.out.println("\nExported " + exported + " file(s) to reports/ folder");
-            } else {
+            
+            // Check if there's any data to export
+            if (transactions.isEmpty() && budgets.isEmpty() && goals.isEmpty()) {
                 System.out.println("No data to export");
+                return;
+            }
+            
+            // Export all data to a single comprehensive CSV file
+            String filePath = FileManager.exportAllData(transactions, budgets, goals);
+            if (filePath != null) {
+                System.out.println("Exported all data report to: " + filePath);
+                System.out.print("Open file? (y/n): ");
+                String open = scanner.nextLine();
+                if (open.equalsIgnoreCase("y")) {
+                    FileManager.openFile(filePath);
+                }
+            } else {
+                System.out.println("Failed to export data");
             }
         }
     }

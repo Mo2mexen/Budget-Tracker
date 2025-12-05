@@ -97,6 +97,66 @@ public class FileManager {
         return writeCSV(fileName, header, rows);
     }
 
+    // Export all data (transactions, budgets, goals) to a single CSV file
+    public static String exportAllData(List<Transaction> transactions, List<Budget> budgets, List<Goal> goals) {
+        String fileName = "reports/complete_report_" + getDate() + ".csv";
+        
+        try {
+            PrintWriter writer = new PrintWriter(new FileWriter(fileName));
+            
+            // Write transactions section
+            if (!transactions.isEmpty()) {
+                writer.println("=== TRANSACTIONS ===");
+                writer.println("Date,Description,Amount,Type,Notes");
+                for (Transaction t : transactions) {
+                    String row = fixText(t.getTransactionDate().toString()) + "," +
+                                fixText(t.getDescription()) + "," +
+                                fixText(String.valueOf(t.getAmount())) + "," +
+                                fixText(t.getType().toString()) + "," +
+                                fixText(t.getNotes());
+                    writer.println(row);
+                }
+                writer.println(); // Empty line separator
+            }
+            
+            // Write budgets section
+            if (!budgets.isEmpty()) {
+                writer.println("=== BUDGETS ===");
+                writer.println("Month,Year,Limit,Spent,Status");
+                for (Budget b : budgets) {
+                    String row = b.getMonth() + "," +
+                                b.getYear() + "," +
+                                b.getMonthlyLimit() + "," +
+                                b.getCurrentSpent() + "," +
+                                fixText(b.getStatus());
+                    writer.println(row);
+                }
+                writer.println(); // Empty line separator
+            }
+            
+            // Write goals section
+            if (!goals.isEmpty()) {
+                writer.println("=== GOALS ===");
+                writer.println("Name,Target,Current,Progress,Deadline");
+                for (Goal g : goals) {
+                    String row = fixText(g.getGoalName()) + "," +
+                                g.getTargetAmount() + "," +
+                                g.getCurrentAmount() + "," +
+                                g.getProgress() + "%," +
+                                g.getDeadline();
+                    writer.println(row);
+                }
+            }
+            
+            writer.close();
+            return fileName;
+            
+        } catch (IOException e) {
+            System.out.println("Error saving complete report: " + e.getMessage());
+            return null;
+        }
+    }
+
     // Open file in default program
     public static boolean openFile(String filePath) {
         try {
