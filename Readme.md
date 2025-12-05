@@ -10,7 +10,7 @@ Budget Tracker helps users manage their finances by tracking income, expenses, b
 
 - **Language**: Java
 - **Database**: MySQL
-- **GUI**: JavaFX 
+- **GUI**: JavaFX
 
 ## Project Structure
 
@@ -40,12 +40,13 @@ Budget-Tracker/
 │   │   └── sample_data.sql
 │   ├── utils/                     # Utility classes
 │   │   └── FileManager.java       # CSV export functionality
-│   └── gui/                       # GUI components 
-└── reports/                       # Generated CSV exports
+│   ├── gui/                       # GUI components
+│   └── reports/                   # Generated CSV exports
+│   └── lib/                       # External libraries (MySQL connector)
+└── bin/                           # Compiled class files
 ```
 
 ## Database Schema
-
 Six main tables:
 - **users** - User accounts and authentication
 - **accounts** - Bank accounts (checking, savings, cash, credit card)
@@ -55,7 +56,6 @@ Six main tables:
 - **goals** - Savings goals with progress tracking
 
 ## Features
-
 - User authentication (login/register)
 - Multiple account management
 - Transaction tracking (income/expense)
@@ -63,5 +63,3 @@ Six main tables:
 - Savings goal tracking
 - Monthly financial reports
 - CSV export functionality
-
-
