@@ -54,3 +54,5 @@ Budget-Tracker/
 - Savings goal tracking
 - Monthly financial reports
 - CSV export functionality
+
+# RUN MAIN USING RUN.BAT FILE IF YOU ARE ON VS CODE AFTER DOWNLOADING (MySQL connector) LIBRARY
