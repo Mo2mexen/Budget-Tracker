@@ -1,8 +1,5 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Category extends BaseEntity implements Displayable {
     private String categoryName;
     private CategoryType type;
@@ -29,18 +26,6 @@ public class Category extends BaseEntity implements Displayable {
 
     public boolean isExpense() {
         return type == CategoryType.EXPENSE;
-    }
-
-    public static List<Category> getDefaultCategories() {
-        List<Category> defaults = new ArrayList<>();
-        defaults.add(new Category(0, 0, "Salary", CategoryType.INCOME, "#4CAF50", "💼", true));
-        defaults.add(new Category(0, 0, "Business", CategoryType.INCOME, "#8BC34A", "💰", true));
-        defaults.add(new Category(0, 0, "Food", CategoryType.EXPENSE, "#FF5722", "🍔", true));
-        defaults.add(new Category(0, 0, "Transport", CategoryType.EXPENSE, "#2196F3", "🚗", true));
-        defaults.add(new Category(0, 0, "Shopping", CategoryType.EXPENSE, "#E91E63", "🛍️", true));
-        defaults.add(new Category(0, 0, "Entertainment", CategoryType.EXPENSE, "#9C27B0", "🎬", true));
-        defaults.add(new Category(0, 0, "Bills", CategoryType.EXPENSE, "#FF9800", "📄", true));
-        return defaults;
     }
 
     @Override
