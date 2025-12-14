@@ -77,6 +77,45 @@ public class GoalDAO {
         }
     }
 
+    public static Goal getGoalById(int goalId) {
+        String sql = "SELECT * FROM goals WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, goalId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Goal g = new Goal(
+                    rs.getInt("id"), rs.getInt("user_id"), rs.getString("goal_name"),
+                    rs.getDouble("target_amount"), rs.getDouble("current_amount"),
+                    rs.getDate("deadline").toLocalDate()
+                );
+                g.setStatus(Goal.GoalStatus.valueOf(rs.getString("status")));
+                g.setCreatedDate(rs.getDate("created_date").toLocalDate());
+                return g;
+            }
+            return null;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static boolean updateGoal(int goalId, String name, double target, LocalDate deadline) {
+        String sql = "UPDATE goals SET goal_name = ?, target_amount = ?, deadline = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setDouble(2, target);
+            stmt.setDate(3, Date.valueOf(deadline));
+            stmt.setInt(4, goalId);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+    }
+
     public static boolean deleteGoal(int goalId) {
         String sql = "DELETE FROM goals WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();

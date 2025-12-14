@@ -1,6 +1,8 @@
 package models;
 
 public class Budget extends BaseEntity implements Calculable, Displayable {
+    private static final double WARNING_THRESHOLD_PERCENTAGE = 80.0;
+
     private int categoryId;
     private double monthlyLimit;
     private int month;
@@ -57,7 +59,7 @@ public class Budget extends BaseEntity implements Calculable, Displayable {
     }
 
     public boolean isNearLimit() {
-        return calculatePercentage() >= 80;
+        return calculatePercentage() >= WARNING_THRESHOLD_PERCENTAGE;
     }
 
     public void addExpense(double amount) {

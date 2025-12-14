@@ -63,6 +63,44 @@ public class AccountDAO {
         }
     }
 
+    public static Account getAccountById(int accountId) {
+        String sql = "SELECT * FROM accounts WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, accountId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Account a = new Account(
+                    rs.getInt("id"), rs.getInt("user_id"), rs.getString("account_name"),
+                    Account.AccountType.valueOf(rs.getString("account_type")),
+                    rs.getDouble("balance"), rs.getString("currency")
+                );
+                a.setCreatedDate(rs.getDate("created_date").toLocalDate());
+                return a;
+            }
+            return null;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static boolean updateAccount(int accountId, String name, String type, String currency) {
+        String sql = "UPDATE accounts SET account_name = ?, account_type = ?, currency = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setString(2, type);
+            stmt.setString(3, currency);
+            stmt.setInt(4, accountId);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+    }
+
     public static boolean deleteAccount(int accountId) {
         String sql = "DELETE FROM accounts WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();

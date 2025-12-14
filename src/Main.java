@@ -13,6 +13,10 @@ public class Main {
     private static List<Budget> budgets = new ArrayList<>();
     private static List<Goal> goals = new ArrayList<>();
 
+    // Default account and category for quick transactions
+    private static final int DEFAULT_ACCOUNT_ID = 1;
+    private static final int DEFAULT_CATEGORY_ID = 1;
+
     public static void main(String[] args) {
         System.out.println("BUDGET TRACKER");
         System.out.println();
@@ -29,11 +33,18 @@ public class Main {
             System.out.print("Choice: ");
 
             int choice = getInt();
-            if (choice == 1) login();
-            else if (choice == 2) createAccount();
-            else if (choice == 3) {
-                System.out.println("Goodbye");
-                return;
+            switch (choice) {
+                case 1:
+                    login();
+                    break;
+                case 2:
+                    createAccount();
+                    break;
+                case 3:
+                    System.out.println("Goodbye");
+                    return;
+                default:
+                    System.out.println("Invalid choice");
             }
         }
     }
@@ -95,17 +106,34 @@ public class Main {
 
             int choice = getInt();
 
-            if (choice == 1) addTransaction();
-            else if (choice == 2) viewTransactions();
-            else if (choice == 3) monthlyReport();
-            else if (choice == 4) viewBudgets();
-            else if (choice == 5) viewGoals();
-            else if (choice == 6) exportData();
-            else if (choice == 7) showProfile();
-            else if (choice == 8) {
-                System.out.println("Logged out");
-                currentUser = null;
-                return;
+            switch (choice) {
+                case 1:
+                    addTransaction();
+                    break;
+                case 2:
+                    viewTransactions();
+                    break;
+                case 3:
+                    monthlyReport();
+                    break;
+                case 4:
+                    viewBudgets();
+                    break;
+                case 5:
+                    viewGoals();
+                    break;
+                case 6:
+                    exportData();
+                    break;
+                case 7:
+                    showProfile();
+                    break;
+                case 8:
+                    System.out.println("Logged out");
+                    currentUser = null;
+                    return;
+                default:
+                    System.out.println("Invalid choice");
             }
         }
     }
@@ -122,7 +150,7 @@ public class Main {
         String notes = scanner.nextLine();
 
         boolean success = TransactionDAO.addTransaction(
-            currentUser.getId(), 1, 1, amount, description,
+            currentUser.getId(), DEFAULT_ACCOUNT_ID, DEFAULT_CATEGORY_ID, amount, description,
             LocalDate.now(), type, notes
         );
 
@@ -149,6 +177,11 @@ public class Main {
         System.out.println("\n--- MONTHLY REPORT ---");
         System.out.print("Month (1-12): ");
         int month = getInt();
+        while (month < 1 || month > 12) {
+            System.out.println("Invalid month! Please enter a number between 1 and 12.");
+            System.out.print("Month (1-12): ");
+            month = getInt();
+        }
         System.out.print("Year: ");
         int year = getInt();
 
@@ -236,77 +269,79 @@ public class Main {
 
         int choice = getInt();
 
-        if (choice == 1) {
-            List<Transaction> transactions = TransactionDAO.getUserTransactions(currentUser.getId());
-            if (transactions.isEmpty()) {
-                System.out.println("No transactions to export");
-                return;
-            }
-            String filePath = FileManager.exportTransactions(transactions);
-            if (filePath != null) {
-                System.out.println("Exported transactions to: " + filePath);
-                System.out.print("Open file? (y/n): ");
-                String open = scanner.nextLine();
-                if (open.equalsIgnoreCase("y")) {
-                    FileManager.openFile(filePath);
+        switch (choice) {
+            case 1:
+                List<Transaction> transactions = TransactionDAO.getUserTransactions(currentUser.getId());
+                if (transactions.isEmpty()) {
+                    System.out.println("No transactions to export");
+                    return;
                 }
-            }
-        } else if (choice == 2) {
-            if (budgets.isEmpty()) {
-                System.out.println("No budgets to export");
-                return;
-            }
-            String filePath = FileManager.exportBudgets(budgets);
-            if (filePath != null) {
-                System.out.println("Exported budgets to: " + filePath);
-                System.out.print("Open file? (y/n): ");
-                String open = scanner.nextLine();
-                if (open.equalsIgnoreCase("y")) {
-                    FileManager.openFile(filePath);
+                String transFilePath = FileManager.exportTransactions(transactions);
+                if (transFilePath != null) {
+                    promptToOpenFile(transFilePath, "transactions");
                 }
-            }
-        } else if (choice == 3) {
-            if (goals.isEmpty()) {
-                System.out.println("No goals to export");
-                return;
-            }
-            String filePath = FileManager.exportGoals(goals);
-            if (filePath != null) {
-                System.out.println("Exported goals to: " + filePath);
-                System.out.print("Open file? (y/n): ");
-                String open = scanner.nextLine();
-                if (open.equalsIgnoreCase("y")) {
-                    FileManager.openFile(filePath);
+                break;
+
+            case 2:
+                if (budgets.isEmpty()) {
+                    System.out.println("No budgets to export");
+                    return;
                 }
-            }
-        } else if (choice == 4) {
-            List<Transaction> transactions = TransactionDAO.getUserTransactions(currentUser.getId());
-            
-            // Check if there's any data to export
-            if (transactions.isEmpty() && budgets.isEmpty() && goals.isEmpty()) {
-                System.out.println("No data to export");
-                return;
-            }
-            
-            // Export all data to a single comprehensive CSV file
-            String filePath = FileManager.exportAllData(transactions, budgets, goals);
-            if (filePath != null) {
-                System.out.println("Exported all data report to: " + filePath);
-                System.out.print("Open file? (y/n): ");
-                String open = scanner.nextLine();
-                if (open.equalsIgnoreCase("y")) {
-                    FileManager.openFile(filePath);
+                String budgetFilePath = FileManager.exportBudgets(budgets);
+                if (budgetFilePath != null) {
+                    promptToOpenFile(budgetFilePath, "budgets");
                 }
-            } else {
-                System.out.println("Failed to export data");
-            }
+                break;
+
+            case 3:
+                if (goals.isEmpty()) {
+                    System.out.println("No goals to export");
+                    return;
+                }
+                String goalFilePath = FileManager.exportGoals(goals);
+                if (goalFilePath != null) {
+                    promptToOpenFile(goalFilePath, "goals");
+                }
+                break;
+
+            case 4:
+                List<Transaction> allTransactions = TransactionDAO.getUserTransactions(currentUser.getId());
+
+                if (allTransactions.isEmpty() && budgets.isEmpty() && goals.isEmpty()) {
+                    System.out.println("No data to export");
+                    return;
+                }
+
+                String allFilePath = FileManager.exportAllData(allTransactions, budgets, goals);
+                if (allFilePath != null) {
+                    promptToOpenFile(allFilePath, "all data report");
+                } else {
+                    System.out.println("Failed to export data");
+                }
+                break;
+
+            case 5:
+                return;
+
+            default:
+                System.out.println("Invalid choice");
+        }
+    }
+
+    private static void promptToOpenFile(String filePath, String dataType) {
+        System.out.println("Exported " + dataType + " to: " + filePath);
+        System.out.print("Open file? (y/n): ");
+        String open = scanner.nextLine();
+        if (open.equalsIgnoreCase("y")) {
+            FileManager.openFile(filePath);
         }
     }
 
     private static int getInt() {
         try {
             return Integer.parseInt(scanner.nextLine());
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number! Please try again.");
             return -1;
         }
     }
@@ -314,7 +349,8 @@ public class Main {
     private static double getDouble() {
         try {
             return Double.parseDouble(scanner.nextLine());
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number! Please try again.");
             return 0.0;
         }
     }

@@ -82,6 +82,53 @@ public class TransactionDAO {
         return list;
     }
 
+    public static Transaction getTransactionById(int transactionId) {
+        String sql = "SELECT * FROM transactions WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, transactionId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Transaction t = new Transaction(
+                    rs.getInt("id"), rs.getInt("user_id"), rs.getInt("account_id"),
+                    rs.getInt("category_id"), rs.getDouble("amount"), rs.getString("description"),
+                    rs.getDate("transaction_date").toLocalDate(),
+                    Transaction.TransactionType.valueOf(rs.getString("type")),
+                    rs.getString("notes")
+                );
+                t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                return t;
+            }
+            return null;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static boolean updateTransaction(int transactionId, int accountId, int categoryId,
+                                           double amount, String description, LocalDate date,
+                                           String type, String notes) {
+        String sql = "UPDATE transactions SET account_id = ?, category_id = ?, amount = ?, " +
+                    "description = ?, transaction_date = ?, type = ?, notes = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, accountId);
+            stmt.setInt(2, categoryId);
+            stmt.setDouble(3, amount);
+            stmt.setString(4, description);
+            stmt.setDate(5, Date.valueOf(date));
+            stmt.setString(6, type);
+            stmt.setString(7, notes);
+            stmt.setInt(8, transactionId);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+    }
+
     public static boolean deleteTransaction(int id) {
         String sql = "DELETE FROM transactions WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();

@@ -60,6 +60,41 @@ public class BudgetDAO {
         }
     }
 
+    public static Budget getBudgetById(int budgetId) {
+        String sql = "SELECT * FROM budgets WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, budgetId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Budget b = new Budget(
+                    rs.getInt("id"), rs.getInt("user_id"), rs.getInt("category_id"),
+                    rs.getDouble("monthly_limit"), rs.getInt("month"), rs.getInt("year")
+                );
+                b.setCurrentSpent(rs.getDouble("current_spent"));
+                return b;
+            }
+            return null;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static boolean updateBudget(int budgetId, double monthlyLimit) {
+        String sql = "UPDATE budgets SET monthly_limit = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, monthlyLimit);
+            stmt.setInt(2, budgetId);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+    }
+
     public static boolean deleteBudget(int budgetId) {
         String sql = "DELETE FROM budgets WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();

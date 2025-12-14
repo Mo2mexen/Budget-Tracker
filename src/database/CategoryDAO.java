@@ -68,6 +68,43 @@ public class CategoryDAO {
         return list;
     }
 
+    public static Category getCategoryById(int categoryId) {
+        String sql = "SELECT * FROM categories WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, categoryId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Category c = new Category(
+                    rs.getInt("id"), rs.getInt("user_id"), rs.getString("category_name"),
+                    Category.CategoryType.valueOf(rs.getString("type")),
+                    rs.getString("color"), rs.getString("icon"), rs.getBoolean("is_default")
+                );
+                return c;
+            }
+            return null;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static boolean updateCategory(int categoryId, String name, String color, String icon) {
+        String sql = "UPDATE categories SET category_name = ?, color = ?, icon = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setString(2, color);
+            stmt.setString(3, icon);
+            stmt.setInt(4, categoryId);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+    }
+
     public static boolean deleteCategory(int categoryId) {
         String sql = "DELETE FROM categories WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();

@@ -29,7 +29,8 @@ CREATE TABLE categories (
     color VARCHAR(20),
     icon VARCHAR(10),
     is_default BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_categories_user_id (user_id)
 );
 
 -- Table 3: Accounts
@@ -41,7 +42,8 @@ CREATE TABLE accounts (
     balance DECIMAL(15, 2) DEFAULT 0.00,
     currency VARCHAR(10) DEFAULT 'USD',
     created_date DATE NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_accounts_user_id (user_id)
 );
 
 -- Table 4: Transactions
@@ -56,9 +58,12 @@ CREATE TABLE transactions (
     type VARCHAR(20) NOT NULL,
     notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (account_id) REFERENCES accounts(id),
-    FOREIGN KEY (category_id) REFERENCES categories(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+    INDEX idx_transactions_user_id (user_id),
+    INDEX idx_transactions_account_id (account_id),
+    INDEX idx_transactions_category_id (category_id)
 );
 
 -- Table 5: Budgets
@@ -70,8 +75,10 @@ CREATE TABLE budgets (
     month INT NOT NULL,
     year INT NOT NULL,
     current_spent DECIMAL(15, 2) DEFAULT 0.00,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (category_id) REFERENCES categories(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+    INDEX idx_budgets_user_id (user_id),
+    INDEX idx_budgets_category_id (category_id)
 );
 
 -- Table 6: Goals
@@ -84,7 +91,8 @@ CREATE TABLE goals (
     deadline DATE NOT NULL,
     status VARCHAR(20) DEFAULT 'ACTIVE',
     created_date DATE NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_goals_user_id (user_id)
 );
 
 SELECT 'Database created successfully!' AS message;
