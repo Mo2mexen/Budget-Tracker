@@ -3,7 +3,13 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(git -C \"c:\\Users\\Moamen Eslam\\Documents\\Java\\Budget-Tracker\" log --oneline -10)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(dir:*)",
+      "Bash(curl:*)",
+      "Bash(powershell:*)",
+      "Bash(ls:*)",
+      "Bash(javac:*)",
+      "Bash(wc:*)"
     ]
   }
 }
