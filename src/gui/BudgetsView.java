@@ -1,7 +1,6 @@
 package gui;
 
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
@@ -10,201 +9,213 @@ import models.Budget;
 import models.Category;
 import database.BudgetDAO;
 import database.CategoryDAO;
+import java.time.LocalDate;
 
 public class BudgetsView {
     private User user;
-    private BudgetDAO dao = new BudgetDAO();
-    private CategoryDAO catDao = new CategoryDAO();
-    private TableView<Budget> table = new TableView<>();
-    private VBox view;
+    private BudgetDAO budgetDAO;
+    private CategoryDAO categoryDAO;
+    private TableView<Budget> budgetsTable;
+    private VBox mainContainer;
 
     public BudgetsView(User user) {
         this.user = user;
-        this.view = create();
+        this.budgetDAO = new BudgetDAO();
+        this.categoryDAO = new CategoryDAO();
+        this.budgetsTable = new TableView<>();
+        this.mainContainer = createView();
     }
 
-    private VBox create() {
-        VBox v = new VBox(15);
-        v.setPadding(new Insets(20));
+    private VBox createView() {
+        VBox container = new VBox(10);
+        container.setPadding(new Insets(10));
 
-        Label title = new Label("Budgets");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        // Title
+        Label titleLabel = new Label("Budgets");
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        HBox btns = new HBox(10);
-        btns.setAlignment(Pos.CENTER_LEFT);
-        btns.getChildren().addAll(
-            createBtn("Add", "#27ae60", e -> addDialog()),
-            createBtn("Edit", "#3498db", e -> editDialog()),
-            createBtn("Delete", "#e74c3c", e -> deleteDialog()),
-            createBtn("Refresh", "#95a5a6", e -> refresh())
-        );
+        // Create buttons
+        Button addButton = new Button("Add");
+        addButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        Button editButton = new Button("Edit");
+        editButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+        Button deleteButton = new Button("Delete");
+        deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
+        Button refreshButton = new Button("Refresh");
+        refreshButton.setStyle("-fx-background-color: #9E9E9E; -fx-text-fill: white;");
 
-        TableColumn<Budget, Integer> idCol = new TableColumn<>("ID");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setPrefWidth(50);
+        addButton.setOnAction(event -> addBudget());
+        editButton.setOnAction(event -> editBudget());
+        deleteButton.setOnAction(event -> deleteBudget());
+        refreshButton.setOnAction(event -> loadBudgets());
 
-        TableColumn<Budget, Integer> monthCol = new TableColumn<>("Month");
-        monthCol.setCellValueFactory(new PropertyValueFactory<>("month"));
-        monthCol.setPrefWidth(80);
+        HBox buttonBox = new HBox(5);
+        buttonBox.getChildren().addAll(addButton, editButton, deleteButton, refreshButton);
 
-        TableColumn<Budget, Integer> yearCol = new TableColumn<>("Year");
-        yearCol.setCellValueFactory(new PropertyValueFactory<>("year"));
-        yearCol.setPrefWidth(80);
+        // Create table columns
+        TableColumn<Budget, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        TableColumn<Budget, Double> limitCol = new TableColumn<>("Limit");
-        limitCol.setCellValueFactory(new PropertyValueFactory<>("monthlyLimit"));
-        limitCol.setPrefWidth(120);
+        TableColumn<Budget, Integer> monthColumn = new TableColumn<>("Month");
+        monthColumn.setCellValueFactory(new PropertyValueFactory<>("month"));
 
-        TableColumn<Budget, Double> spentCol = new TableColumn<>("Spent");
-        spentCol.setCellValueFactory(new PropertyValueFactory<>("currentSpent"));
-        spentCol.setPrefWidth(120);
+        TableColumn<Budget, Integer> yearColumn = new TableColumn<>("Year");
+        yearColumn.setCellValueFactory(new PropertyValueFactory<>("year"));
 
-        TableColumn<Budget, String> statusCol = new TableColumn<>("Status");
-        statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
-        statusCol.setPrefWidth(100);
+        TableColumn<Budget, Double> limitColumn = new TableColumn<>("Limit");
+        limitColumn.setCellValueFactory(new PropertyValueFactory<>("monthlyLimit"));
 
-        table.getColumns().addAll(idCol, monthCol, yearCol, limitCol, spentCol, statusCol);
-        refresh();
+        TableColumn<Budget, Double> spentColumn = new TableColumn<>("Spent");
+        spentColumn.setCellValueFactory(new PropertyValueFactory<>("currentSpent"));
 
-        v.getChildren().addAll(title, btns, table);
-        return v;
+        budgetsTable.getColumns().addAll(idColumn, monthColumn, yearColumn, limitColumn, spentColumn);
+        loadBudgets();
+
+        container.getChildren().addAll(titleLabel, buttonBox, budgetsTable);
+        return container;
     }
 
-    private Button createBtn(String text, String color, javafx.event.EventHandler<javafx.event.ActionEvent> action) {
-        Button btn = new Button(text);
-        btn.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white;");
-        btn.setOnAction(action);
-        return btn;
+    private void loadBudgets() {
+        budgetsTable.getItems().clear();
+        budgetsTable.getItems().addAll(budgetDAO.getUserBudgets(user.getId()));
     }
 
-    private void refresh() {
-        table.getItems().clear();
-        table.getItems().addAll(dao.getUserBudgets(user.getId()));
-    }
+    private void addBudget() {
+        java.util.List<Category> categoryList = categoryDAO.getUserCategories(user.getId());
 
-    private void addDialog() {
-        var categories = catDao.getUserCategories(user.getId());
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add Budget");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        Dialog<ButtonType> dlg = new Dialog<>();
-        dlg.setTitle("Add Budget");
-        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        VBox dialogBox = new VBox(5);
+        dialogBox.setPadding(new Insets(10));
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
-
-        ComboBox<Category> catCombo = new ComboBox<>();
-        catCombo.getItems().addAll(categories);
-        if (!categories.isEmpty()) catCombo.setValue(categories.get(0));
+        ComboBox<Category> categoryBox = new ComboBox<>();
+        categoryBox.getItems().addAll(categoryList);
+        if (!categoryList.isEmpty()) {
+            categoryBox.setValue(categoryList.get(0));
+        }
 
         TextField limitField = new TextField();
-        Spinner<Integer> monthSpinner = new Spinner<>(1, 12, java.time.LocalDate.now().getMonthValue());
-        Spinner<Integer> yearSpinner = new Spinner<>(2020, 2100, java.time.LocalDate.now().getYear());
 
-        grid.add(new Label("Category:"), 0, 0);
-        grid.add(catCombo, 1, 0);
-        grid.add(new Label("Limit:"), 0, 1);
-        grid.add(limitField, 1, 1);
-        grid.add(new Label("Month:"), 0, 2);
-        grid.add(monthSpinner, 1, 2);
-        grid.add(new Label("Year:"), 0, 3);
-        grid.add(yearSpinner, 1, 3);
+        TextField monthField = new TextField(String.valueOf(LocalDate.now().getMonthValue()));
+        TextField yearField = new TextField(String.valueOf(LocalDate.now().getYear()));
 
-        dlg.getDialogPane().setContent(grid);
+        dialogBox.getChildren().addAll(
+            new Label("Category:"), categoryBox,
+            new Label("Limit:"), limitField,
+            new Label("Month:"), monthField,
+            new Label("Year:"), yearField
+        );
 
-        dlg.showAndWait().ifPresent(r -> {
-            if (r == ButtonType.OK) {
+        dialog.getDialogPane().setContent(dialogBox);
+
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                if (categoryBox.getValue() == null) {
+                    showMessage("Error", "Please select a category");
+                    return;
+                }
+
                 try {
-                    if (catCombo.getValue() == null) {
-                        alert(Alert.AlertType.ERROR, "Error", "Select category");
-                        return;
-                    }
                     double limit = Double.parseDouble(limitField.getText().trim());
-                    if (limit <= 0) throw new Exception("Limit must be > 0");
-                    if (dao.createBudget(user.getId(), catCombo.getValue().getId(), limit,
-                        monthSpinner.getValue(), yearSpinner.getValue())) {
-                        alert(Alert.AlertType.INFORMATION, "Success", "Budget created");
-                        refresh();
+                    int month = Integer.parseInt(monthField.getText().trim());
+                    int year = Integer.parseInt(yearField.getText().trim());
+
+                    boolean success = budgetDAO.createBudget(user.getId(), categoryBox.getValue().getId(), limit, month, year);
+
+                    if (success) {
+                        showMessage("Success", "Budget created");
+                        loadBudgets();
                     } else {
-                        alert(Alert.AlertType.ERROR, "Error", "Failed");
+                        showMessage("Error", "Failed to create budget");
                     }
-                } catch (Exception ex) {
-                    alert(Alert.AlertType.ERROR, "Error", ex.getMessage());
+                } catch (Exception exception) {
+                    showMessage("Error", "Invalid input");
                 }
             }
         });
     }
 
-    private void editDialog() {
-        Budget bud = table.getSelectionModel().getSelectedItem();
-        if (bud == null) {
-            alert(Alert.AlertType.WARNING, "Warning", "Select budget");
+    private void editBudget() {
+        Budget selectedBudget = budgetsTable.getSelectionModel().getSelectedItem();
+
+        if (selectedBudget == null) {
+            showMessage("Warning", "Please select a budget");
             return;
         }
 
-        Dialog<ButtonType> dlg = new Dialog<>();
-        dlg.setTitle("Edit Budget");
-        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Edit Budget");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
+        VBox dialogBox = new VBox(5);
+        dialogBox.setPadding(new Insets(10));
 
-        TextField limitField = new TextField(String.valueOf(bud.getMonthlyLimit()));
+        TextField limitField = new TextField(String.valueOf(selectedBudget.getMonthlyLimit()));
 
-        grid.add(new Label("Limit:"), 0, 0);
-        grid.add(limitField, 1, 0);
+        dialogBox.getChildren().addAll(
+            new Label("Limit:"), limitField
+        );
 
-        dlg.getDialogPane().setContent(grid);
+        dialog.getDialogPane().setContent(dialogBox);
 
-        dlg.showAndWait().ifPresent(r -> {
-            if (r == ButtonType.OK) {
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
                 try {
                     double limit = Double.parseDouble(limitField.getText().trim());
-                    if (limit <= 0) throw new Exception("Limit must be > 0");
-                    if (dao.updateBudget(bud.getId(), limit)) {
-                        alert(Alert.AlertType.INFORMATION, "Success", "Updated");
-                        refresh();
+
+                    boolean success = budgetDAO.updateBudget(selectedBudget.getId(), limit);
+
+                    if (success) {
+                        showMessage("Success", "Budget updated");
+                        loadBudgets();
                     } else {
-                        alert(Alert.AlertType.ERROR, "Error", "Failed");
+                        showMessage("Error", "Failed to update budget");
                     }
-                } catch (Exception ex) {
-                    alert(Alert.AlertType.ERROR, "Error", ex.getMessage());
+                } catch (Exception exception) {
+                    showMessage("Error", "Invalid input");
                 }
             }
         });
     }
 
-    private void deleteDialog() {
-        Budget bud = table.getSelectionModel().getSelectedItem();
-        if (bud == null) {
-            alert(Alert.AlertType.WARNING, "Warning", "Select budget");
+    private void deleteBudget() {
+        Budget selectedBudget = budgetsTable.getSelectionModel().getSelectedItem();
+
+        if (selectedBudget == null) {
+            showMessage("Warning", "Please select a budget");
             return;
         }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete budget?",
-            ButtonType.OK, ButtonType.CANCEL);
-        if (confirm.showAndWait().get() == ButtonType.OK) {
-            if (dao.deleteBudget(bud.getId())) {
-                alert(Alert.AlertType.INFORMATION, "Success", "Deleted");
-                refresh();
-            } else {
-                alert(Alert.AlertType.ERROR, "Error", "Failed");
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Confirm");
+        confirmDialog.setHeaderText(null);
+        confirmDialog.setContentText("Delete this budget?");
+
+        confirmDialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                boolean success = budgetDAO.deleteBudget(selectedBudget.getId());
+
+                if (success) {
+                    showMessage("Success", "Budget deleted");
+                    loadBudgets();
+                } else {
+                    showMessage("Error", "Failed to delete budget");
+                }
             }
-        }
+        });
     }
 
-    private void alert(Alert.AlertType type, String title, String msg) {
-        Alert a = new Alert(type);
-        a.setTitle(title);
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.showAndWait();
+    private void showMessage(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public VBox getView() {
-        return view;
+        return mainContainer;
     }
 }

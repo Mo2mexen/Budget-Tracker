@@ -1,7 +1,6 @@
 package gui;
 
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
@@ -12,203 +11,231 @@ import database.AccountDAO;
 
 public class AccountsView {
     private User user;
-    private AccountDAO dao = new AccountDAO();
-    private TableView<Account> table = new TableView<>();
-    private VBox view;
+    private AccountDAO accountDAO;
+    private TableView<Account> accountsTable;
+    private VBox mainContainer;
 
     public AccountsView(User user) {
         this.user = user;
-        this.view = create();
+        this.accountDAO = new AccountDAO();
+        this.accountsTable = new TableView<>();
+        this.mainContainer = createView();
     }
 
-    private VBox create() {
-        VBox v = new VBox(15);
-        v.setPadding(new Insets(20));
+    private VBox createView() {
+        VBox container = new VBox(10);
+        container.setPadding(new Insets(10));
 
-        Label title = new Label("Accounts");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        // Title
+        Label titleLabel = new Label("Accounts");
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        HBox btns = new HBox(10);
-        btns.setAlignment(Pos.CENTER_LEFT);
-        btns.getChildren().addAll(
-            createBtn("Add", "#27ae60", e -> addDialog()),
-            createBtn("Edit", "#3498db", e -> editDialog()),
-            createBtn("Delete", "#e74c3c", e -> deleteDialog()),
-            createBtn("Refresh", "#95a5a6", e -> refresh())
-        );
+        // Create buttons
+        Button addButton = new Button("Add");
+        addButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        Button editButton = new Button("Edit");
+        editButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+        Button deleteButton = new Button("Delete");
+        deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
+        Button refreshButton = new Button("Refresh");
+        refreshButton.setStyle("-fx-background-color: #9E9E9E; -fx-text-fill: white;");
 
-        TableColumn<Account, Integer> idCol = new TableColumn<>("ID");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setPrefWidth(50);
+        addButton.setOnAction(event -> addAccount());
+        editButton.setOnAction(event -> editAccount());
+        deleteButton.setOnAction(event -> deleteAccount());
+        refreshButton.setOnAction(event -> loadAccounts());
 
-        TableColumn<Account, String> nameCol = new TableColumn<>("Name");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("accountName"));
-        nameCol.setPrefWidth(200);
+        HBox buttonBox = new HBox(5);
+        buttonBox.getChildren().addAll(addButton, editButton, deleteButton, refreshButton);
 
-        TableColumn<Account, AccountType> typeCol = new TableColumn<>("Type");
-        typeCol.setCellValueFactory(new PropertyValueFactory<>("accountType"));
-        typeCol.setPrefWidth(150);
+        // Create table columns
+        TableColumn<Account, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        TableColumn<Account, Double> balCol = new TableColumn<>("Balance");
-        balCol.setCellValueFactory(new PropertyValueFactory<>("balance"));
-        balCol.setPrefWidth(150);
+        TableColumn<Account, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("accountName"));
 
-        TableColumn<Account, String> curCol = new TableColumn<>("Currency");
-        curCol.setCellValueFactory(new PropertyValueFactory<>("currency"));
-        curCol.setPrefWidth(100);
+        TableColumn<Account, AccountType> typeColumn = new TableColumn<>("Type");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("accountType"));
 
-        table.getColumns().addAll(idCol, nameCol, typeCol, balCol, curCol);
-        refresh();
+        TableColumn<Account, Double> balanceColumn = new TableColumn<>("Balance");
+        balanceColumn.setCellValueFactory(new PropertyValueFactory<>("balance"));
 
-        v.getChildren().addAll(title, btns, table);
-        return v;
+        TableColumn<Account, String> currencyColumn = new TableColumn<>("Currency");
+        currencyColumn.setCellValueFactory(new PropertyValueFactory<>("currency"));
+
+        accountsTable.getColumns().addAll(idColumn, nameColumn, typeColumn, balanceColumn, currencyColumn);
+        loadAccounts();
+
+        container.getChildren().addAll(titleLabel, buttonBox, accountsTable);
+        return container;
     }
 
-    private Button createBtn(String text, String color, javafx.event.EventHandler<javafx.event.ActionEvent> action) {
-        Button btn = new Button(text);
-        btn.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white;");
-        btn.setOnAction(action);
-        return btn;
+    private void loadAccounts() {
+        accountsTable.getItems().clear();
+        accountsTable.getItems().addAll(accountDAO.getUserAccounts(user.getId()));
     }
 
-    private void refresh() {
-        table.getItems().clear();
-        table.getItems().addAll(dao.getUserAccounts(user.getId()));
-    }
+    private void addAccount() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add Account");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-    private void addDialog() {
-        Dialog<ButtonType> dlg = new Dialog<>();
-        dlg.setTitle("Add Account");
-        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
+        VBox dialogBox = new VBox(5);
+        dialogBox.setPadding(new Insets(10));
 
         TextField nameField = new TextField();
-        ComboBox<AccountType> typeCombo = new ComboBox<>();
-        typeCombo.getItems().addAll(AccountType.values());
-        typeCombo.setValue(AccountType.CHECKING);
-        TextField balField = new TextField("0.0");
-        ComboBox<String> curCombo = new ComboBox<>();
-        curCombo.getItems().addAll("USD", "EUR", "GBP", "JPY", "CAD", "AUD", "EGP", "SAR", "AED");
-        curCombo.setValue(user.getCurrency());
 
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Type:"), 0, 1);
-        grid.add(typeCombo, 1, 1);
-        grid.add(new Label("Balance:"), 0, 2);
-        grid.add(balField, 1, 2);
-        grid.add(new Label("Currency:"), 0, 3);
-        grid.add(curCombo, 1, 3);
+        ComboBox<AccountType> typeBox = new ComboBox<>();
+        typeBox.getItems().addAll(AccountType.values());
+        typeBox.setValue(AccountType.CHECKING);
 
-        dlg.getDialogPane().setContent(grid);
+        TextField balanceField = new TextField("0.0");
 
-        dlg.showAndWait().ifPresent(r -> {
-            if (r == ButtonType.OK) {
+        ComboBox<String> currencyBox = new ComboBox<>();
+        currencyBox.getItems().addAll("USD", "EUR", "EGP");
+        currencyBox.setValue(user.getCurrency());
+
+        dialogBox.getChildren().addAll(
+            new Label("Name:"), nameField,
+            new Label("Type:"), typeBox,
+            new Label("Balance:"), balanceField,
+            new Label("Currency:"), currencyBox
+        );
+
+        dialog.getDialogPane().setContent(dialogBox);
+
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                String accountName = nameField.getText().trim();
+
+                if (accountName.isEmpty()) {
+                    showMessage("Error", "Name is required");
+                    return;
+                }
+
                 try {
-                    String name = nameField.getText().trim();
-                    if (name.isEmpty()) throw new Exception("Name required");
-                    double bal = Double.parseDouble(balField.getText().trim());
-                    if (dao.createAccount(user.getId(), name, typeCombo.getValue().name(), bal, curCombo.getValue())) {
-                        alert(Alert.AlertType.INFORMATION, "Success", "Account created");
-                        refresh();
+                    double balance = Double.parseDouble(balanceField.getText().trim());
+                    String type = typeBox.getValue().name();
+                    String currency = currencyBox.getValue();
+
+                    boolean success = accountDAO.createAccount(user.getId(), accountName, type, balance, currency);
+
+                    if (success) {
+                        showMessage("Success", "Account created");
+                        loadAccounts();
                     } else {
-                        alert(Alert.AlertType.ERROR, "Error", "Failed");
+                        showMessage("Error", "Failed to create account");
                     }
-                } catch (Exception ex) {
-                    alert(Alert.AlertType.ERROR, "Error", ex.getMessage());
+                } catch (Exception exception) {
+                    showMessage("Error", "Invalid input");
                 }
             }
         });
     }
 
-    private void editDialog() {
-        Account acc = table.getSelectionModel().getSelectedItem();
-        if (acc == null) {
-            alert(Alert.AlertType.WARNING, "Warning", "Select account");
+    private void editAccount() {
+        Account selectedAccount = accountsTable.getSelectionModel().getSelectedItem();
+
+        if (selectedAccount == null) {
+            showMessage("Warning", "Please select an account");
             return;
         }
 
-        Dialog<ButtonType> dlg = new Dialog<>();
-        dlg.setTitle("Edit Account");
-        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Edit Account");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
+        VBox dialogBox = new VBox(5);
+        dialogBox.setPadding(new Insets(10));
 
-        TextField nameField = new TextField(acc.getAccountName());
-        ComboBox<AccountType> typeCombo = new ComboBox<>();
-        typeCombo.getItems().addAll(AccountType.values());
-        typeCombo.setValue(acc.getAccountType());
-        TextField balField = new TextField(String.valueOf(acc.getBalance()));
-        ComboBox<String> curCombo = new ComboBox<>();
-        curCombo.getItems().addAll("USD", "EUR", "GBP", "JPY", "CAD", "AUD", "EGP", "SAR", "AED");
-        curCombo.setValue(acc.getCurrency());
+        TextField nameField = new TextField(selectedAccount.getAccountName());
 
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Type:"), 0, 1);
-        grid.add(typeCombo, 1, 1);
-        grid.add(new Label("Balance:"), 0, 2);
-        grid.add(balField, 1, 2);
-        grid.add(new Label("Currency:"), 0, 3);
-        grid.add(curCombo, 1, 3);
+        ComboBox<AccountType> typeBox = new ComboBox<>();
+        typeBox.getItems().addAll(AccountType.values());
+        typeBox.setValue(selectedAccount.getAccountType());
 
-        dlg.getDialogPane().setContent(grid);
+        TextField balanceField = new TextField(String.valueOf(selectedAccount.getBalance()));
 
-        dlg.showAndWait().ifPresent(r -> {
-            if (r == ButtonType.OK) {
+        ComboBox<String> currencyBox = new ComboBox<>();
+        currencyBox.getItems().addAll("USD", "EUR", "EGP");
+        currencyBox.setValue(selectedAccount.getCurrency());
+
+        dialogBox.getChildren().addAll(
+            new Label("Name:"), nameField,
+            new Label("Type:"), typeBox,
+            new Label("Balance:"), balanceField,
+            new Label("Currency:"), currencyBox
+        );
+
+        dialog.getDialogPane().setContent(dialogBox);
+
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                String accountName = nameField.getText().trim();
+
+                if (accountName.isEmpty()) {
+                    showMessage("Error", "Name is required");
+                    return;
+                }
+
                 try {
-                    String name = nameField.getText().trim();
-                    if (name.isEmpty()) throw new Exception("Name required");
-                    double bal = Double.parseDouble(balField.getText().trim());
-                    if (dao.updateAccount(acc.getId(), name, typeCombo.getValue().name(), curCombo.getValue())) {
-                        dao.updateBalance(acc.getId(), bal);
-                        alert(Alert.AlertType.INFORMATION, "Success", "Account updated");
-                        refresh();
+                    double balance = Double.parseDouble(balanceField.getText().trim());
+                    String type = typeBox.getValue().name();
+                    String currency = currencyBox.getValue();
+
+                    boolean success = accountDAO.updateAccount(selectedAccount.getId(), accountName, type, currency);
+
+                    if (success) {
+                        accountDAO.updateBalance(selectedAccount.getId(), balance);
+                        showMessage("Success", "Account updated");
+                        loadAccounts();
                     } else {
-                        alert(Alert.AlertType.ERROR, "Error", "Failed");
+                        showMessage("Error", "Failed to update account");
                     }
-                } catch (Exception ex) {
-                    alert(Alert.AlertType.ERROR, "Error", ex.getMessage());
+                } catch (Exception exception) {
+                    showMessage("Error", "Invalid input");
                 }
             }
         });
     }
 
-    private void deleteDialog() {
-        Account acc = table.getSelectionModel().getSelectedItem();
-        if (acc == null) {
-            alert(Alert.AlertType.WARNING, "Warning", "Select account");
+    private void deleteAccount() {
+        Account selectedAccount = accountsTable.getSelectionModel().getSelectedItem();
+
+        if (selectedAccount == null) {
+            showMessage("Warning", "Please select an account");
             return;
         }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + acc.getAccountName() + "?",
-            ButtonType.OK, ButtonType.CANCEL);
-        if (confirm.showAndWait().get() == ButtonType.OK) {
-            if (dao.deleteAccount(acc.getId())) {
-                alert(Alert.AlertType.INFORMATION, "Success", "Deleted");
-                refresh();
-            } else {
-                alert(Alert.AlertType.ERROR, "Error", "Failed");
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Confirm");
+        confirmDialog.setHeaderText(null);
+        confirmDialog.setContentText("Delete account: " + selectedAccount.getAccountName() + "?");
+
+        confirmDialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                boolean success = accountDAO.deleteAccount(selectedAccount.getId());
+
+                if (success) {
+                    showMessage("Success", "Account deleted");
+                    loadAccounts();
+                } else {
+                    showMessage("Error", "Failed to delete account");
+                }
             }
-        }
+        });
     }
 
-    private void alert(Alert.AlertType type, String title, String msg) {
-        Alert a = new Alert(type);
-        a.setTitle(title);
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.showAndWait();
+    private void showMessage(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public VBox getView() {
-        return view;
+        return mainContainer;
     }
 }

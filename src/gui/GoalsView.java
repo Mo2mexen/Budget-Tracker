@@ -1,10 +1,19 @@
 package gui;
 
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.*;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import models.User;
 import models.Goal;
 import models.Goal.GoalStatus;
@@ -13,253 +22,221 @@ import java.time.LocalDate;
 
 public class GoalsView {
     private User user;
-    private GoalDAO dao = new GoalDAO();
-    private TableView<Goal> table = new TableView<>();
-    private VBox view;
+    private GoalDAO goalDAO;
+    private TableView<Goal> goalsTable;
+    private VBox mainContainer;
 
     public GoalsView(User user) {
         this.user = user;
-        this.view = create();
+        this.goalDAO = new GoalDAO();
+        this.goalsTable = new TableView<>();
+        this.mainContainer = createView();
     }
 
-    private VBox create() {
-        VBox v = new VBox(15);
-        v.setPadding(new Insets(20));
+    private VBox createView() {
+        VBox container = new VBox(10);
+        container.setPadding(new Insets(10));
 
-        Label title = new Label("Goals");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        // Title
+        Label titleLabel = new Label("Goals");
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        HBox btns = new HBox(10);
-        btns.setAlignment(Pos.CENTER_LEFT);
-        btns.getChildren().addAll(
-            createBtn("Add", "#27ae60", e -> addDialog()),
-            createBtn("Edit", "#3498db", e -> editDialog()),
-            createBtn("Contribute", "#9b59b6", e -> contributeDialog()),
-            createBtn("Delete", "#e74c3c", e -> deleteDialog()),
-            createBtn("Refresh", "#95a5a6", e -> refresh())
-        );
+        // Create buttons
+        Button addButton = new Button("Add");
+        addButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        Button editButton = new Button("Edit");
+        editButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+        Button deleteButton = new Button("Delete");
+        deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
+        Button refreshButton = new Button("Refresh");
+        refreshButton.setStyle("-fx-background-color: #9E9E9E; -fx-text-fill: white;");
 
-        TableColumn<Goal, Integer> idCol = new TableColumn<>("ID");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setPrefWidth(50);
+        addButton.setOnAction(event -> addGoal());
+        editButton.setOnAction(event -> editGoal());
+        deleteButton.setOnAction(event -> deleteGoal());
+        refreshButton.setOnAction(event -> loadGoals());
 
-        TableColumn<Goal, String> nameCol = new TableColumn<>("Name");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("goalName"));
-        nameCol.setPrefWidth(150);
+        HBox buttonBox = new HBox(5);
+        buttonBox.getChildren().addAll(addButton, editButton, deleteButton, refreshButton);
 
-        TableColumn<Goal, Double> targetCol = new TableColumn<>("Target");
-        targetCol.setCellValueFactory(new PropertyValueFactory<>("targetAmount"));
-        targetCol.setPrefWidth(100);
+        // Create table columns
+        TableColumn<Goal, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        TableColumn<Goal, Double> currentCol = new TableColumn<>("Current");
-        currentCol.setCellValueFactory(new PropertyValueFactory<>("currentAmount"));
-        currentCol.setPrefWidth(100);
+        TableColumn<Goal, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("goalName"));
 
-        TableColumn<Goal, LocalDate> deadlineCol = new TableColumn<>("Deadline");
-        deadlineCol.setCellValueFactory(new PropertyValueFactory<>("deadline"));
-        deadlineCol.setPrefWidth(100);
+        TableColumn<Goal, Double> targetColumn = new TableColumn<>("Target");
+        targetColumn.setCellValueFactory(new PropertyValueFactory<>("targetAmount"));
 
-        TableColumn<Goal, GoalStatus> statusCol = new TableColumn<>("Status");
-        statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
-        statusCol.setPrefWidth(100);
+        TableColumn<Goal, Double> currentColumn = new TableColumn<>("Current");
+        currentColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmount"));
 
-        table.getColumns().addAll(idCol, nameCol, targetCol, currentCol, deadlineCol, statusCol);
-        refresh();
+        TableColumn<Goal, LocalDate> deadlineColumn = new TableColumn<>("Deadline");
+        deadlineColumn.setCellValueFactory(new PropertyValueFactory<>("deadline"));
 
-        v.getChildren().addAll(title, btns, table);
-        return v;
+        TableColumn<Goal, GoalStatus> statusColumn = new TableColumn<>("Status");
+        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        goalsTable.getColumns().addAll(idColumn, nameColumn, targetColumn, currentColumn, deadlineColumn, statusColumn);
+        loadGoals();
+
+        container.getChildren().addAll(titleLabel, buttonBox, goalsTable);
+        return container;
     }
 
-    private Button createBtn(String text, String color, javafx.event.EventHandler<javafx.event.ActionEvent> action) {
-        Button btn = new Button(text);
-        btn.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white;");
-        btn.setOnAction(action);
-        return btn;
+    private void loadGoals() {
+        goalsTable.getItems().clear();
+        goalsTable.getItems().addAll(goalDAO.getUserGoals(user.getId()));
     }
 
-    private void refresh() {
-        table.getItems().clear();
-        table.getItems().addAll(dao.getUserGoals(user.getId()));
-    }
+    private void addGoal() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add Goal");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-    private void addDialog() {
-        Dialog<ButtonType> dlg = new Dialog<>();
-        dlg.setTitle("Add Goal");
-        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
+        VBox dialogBox = new VBox(5);
+        dialogBox.setPadding(new Insets(10));
 
         TextField nameField = new TextField();
         TextField targetField = new TextField();
         DatePicker deadlinePicker = new DatePicker(LocalDate.now().plusMonths(6));
 
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Target:"), 0, 1);
-        grid.add(targetField, 1, 1);
-        grid.add(new Label("Deadline:"), 0, 2);
-        grid.add(deadlinePicker, 1, 2);
+        dialogBox.getChildren().addAll(
+            new Label("Name:"), nameField,
+            new Label("Target:"), targetField,
+            new Label("Deadline:"), deadlinePicker
+        );
 
-        dlg.getDialogPane().setContent(grid);
+        dialog.getDialogPane().setContent(dialogBox);
 
-        dlg.showAndWait().ifPresent(r -> {
-            if (r == ButtonType.OK) {
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                String goalName = nameField.getText().trim();
+
+                if (goalName.isEmpty()) {
+                    showMessage("Error", "Name is required");
+                    return;
+                }
+
                 try {
-                    String name = nameField.getText().trim();
-                    if (name.isEmpty()) throw new Exception("Name required");
-                    double target = Double.parseDouble(targetField.getText().trim());
-                    if (target <= 0) throw new Exception("Target must be > 0");
-                    if (dao.createGoal(user.getId(), name, target, deadlinePicker.getValue())) {
-                        alert(Alert.AlertType.INFORMATION, "Success", "Goal created");
-                        refresh();
-                    } else {
-                        alert(Alert.AlertType.ERROR, "Error", "Failed");
+                    double targetAmount = Double.parseDouble(targetField.getText().trim());
+
+                    if (targetAmount <= 0) {
+                        showMessage("Error", "Target must be greater than 0");
+                        return;
                     }
-                } catch (Exception ex) {
-                    alert(Alert.AlertType.ERROR, "Error", ex.getMessage());
+
+                    boolean success = goalDAO.createGoal(user.getId(), goalName, targetAmount, deadlinePicker.getValue());
+
+                    if (success) {
+                        showMessage("Success", "Goal created");
+                        loadGoals();
+                    } else {
+                        showMessage("Error", "Failed to create goal");
+                    }
+                } catch (Exception exception) {
+                    showMessage("Error", "Invalid input");
                 }
             }
         });
     }
 
-    private void editDialog() {
-        Goal goal = table.getSelectionModel().getSelectedItem();
-        if (goal == null) {
-            alert(Alert.AlertType.WARNING, "Warning", "Select goal");
+    private void editGoal() {
+        Goal selectedGoal = goalsTable.getSelectionModel().getSelectedItem();
+
+        if (selectedGoal == null) {
+            showMessage("Warning", "Please select a goal");
             return;
         }
 
-        Dialog<ButtonType> dlg = new Dialog<>();
-        dlg.setTitle("Edit Goal");
-        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Edit Goal");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
+        VBox dialogBox = new VBox(5);
+        dialogBox.setPadding(new Insets(10));
 
-        TextField nameField = new TextField(goal.getGoalName());
-        TextField targetField = new TextField(String.valueOf(goal.getTargetAmount()));
-        DatePicker deadlinePicker = new DatePicker(goal.getDeadline());
-        ComboBox<GoalStatus> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll(GoalStatus.values());
-        statusCombo.setValue(goal.getStatus());
+        TextField nameField = new TextField(selectedGoal.getGoalName());
+        TextField targetField = new TextField(String.valueOf(selectedGoal.getTargetAmount()));
+        DatePicker deadlinePicker = new DatePicker(selectedGoal.getDeadline());
+        ComboBox<GoalStatus> statusBox = new ComboBox<>();
+        statusBox.getItems().addAll(GoalStatus.values());
+        statusBox.setValue(selectedGoal.getStatus());
 
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Target:"), 0, 1);
-        grid.add(targetField, 1, 1);
-        grid.add(new Label("Deadline:"), 0, 2);
-        grid.add(deadlinePicker, 1, 2);
-        grid.add(new Label("Status:"), 0, 3);
-        grid.add(statusCombo, 1, 3);
+        dialogBox.getChildren().addAll(
+            new Label("Name:"), nameField,
+            new Label("Target:"), targetField,
+            new Label("Deadline:"), deadlinePicker,
+            new Label("Status:"), statusBox
+        );
 
-        dlg.getDialogPane().setContent(grid);
+        dialog.getDialogPane().setContent(dialogBox);
 
-        dlg.showAndWait().ifPresent(r -> {
-            if (r == ButtonType.OK) {
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                String goalName = nameField.getText().trim();
+
+                if (goalName.isEmpty()) {
+                    showMessage("Error", "Name is required");
+                    return;
+                }
+
                 try {
-                    String name = nameField.getText().trim();
-                    if (name.isEmpty()) throw new Exception("Name required");
-                    double target = Double.parseDouble(targetField.getText().trim());
-                    if (dao.updateGoal(goal.getId(), name, target, deadlinePicker.getValue())) {
-                        dao.updateStatus(goal.getId(), statusCombo.getValue().name());
-                        alert(Alert.AlertType.INFORMATION, "Success", "Updated");
-                        refresh();
+                    double targetAmount = Double.parseDouble(targetField.getText().trim());
+
+                    boolean success = goalDAO.updateGoal(selectedGoal.getId(), goalName, targetAmount, deadlinePicker.getValue());
+
+                    if (success) {
+                        goalDAO.updateStatus(selectedGoal.getId(), statusBox.getValue().name());
+                        showMessage("Success", "Goal updated");
+                        loadGoals();
                     } else {
-                        alert(Alert.AlertType.ERROR, "Error", "Failed");
+                        showMessage("Error", "Failed to update goal");
                     }
-                } catch (Exception ex) {
-                    alert(Alert.AlertType.ERROR, "Error", ex.getMessage());
+                } catch (Exception exception) {
+                    showMessage("Error", "Invalid input");
                 }
             }
         });
     }
 
-    private void contributeDialog() {
-        Goal goal = table.getSelectionModel().getSelectedItem();
-        if (goal == null) {
-            alert(Alert.AlertType.WARNING, "Warning", "Select goal");
-            return;
-        }
-        if (goal.isCompleted()) {
-            alert(Alert.AlertType.INFORMATION, "Info", "Goal already completed");
+    private void deleteGoal() {
+        Goal selectedGoal = goalsTable.getSelectionModel().getSelectedItem();
+
+        if (selectedGoal == null) {
+            showMessage("Warning", "Please select a goal");
             return;
         }
 
-        Dialog<ButtonType> dlg = new Dialog<>();
-        dlg.setTitle("Add Contribution");
-        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Confirm");
+        confirmDialog.setHeaderText(null);
+        confirmDialog.setContentText("Delete goal: " + selectedGoal.getGoalName() + "?");
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
+        confirmDialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                boolean success = goalDAO.deleteGoal(selectedGoal.getId());
 
-        Label info = new Label("Current: " + goal.getCurrentAmount() + " / Target: " + goal.getTargetAmount());
-        TextField amtField = new TextField();
-
-        grid.add(info, 0, 0, 2, 1);
-        grid.add(new Label("Amount:"), 0, 1);
-        grid.add(amtField, 1, 1);
-
-        dlg.getDialogPane().setContent(grid);
-
-        dlg.showAndWait().ifPresent(r -> {
-            if (r == ButtonType.OK) {
-                try {
-                    double amt = Double.parseDouble(amtField.getText().trim());
-                    if (amt <= 0) throw new Exception("Amount must be > 0");
-                    double newAmt = goal.getCurrentAmount() + amt;
-                    if (dao.updateProgress(goal.getId(), newAmt)) {
-                        if (newAmt >= goal.getTargetAmount()) {
-                            dao.updateStatus(goal.getId(), GoalStatus.COMPLETED.name());
-                            alert(Alert.AlertType.INFORMATION, "Success", "Goal completed!");
-                        } else {
-                            alert(Alert.AlertType.INFORMATION, "Success", "Contribution added");
-                        }
-                        refresh();
-                    } else {
-                        alert(Alert.AlertType.ERROR, "Error", "Failed");
-                    }
-                } catch (Exception ex) {
-                    alert(Alert.AlertType.ERROR, "Error", ex.getMessage());
+                if (success) {
+                    showMessage("Success", "Goal deleted");
+                    loadGoals();
+                } else {
+                    showMessage("Error", "Failed to delete goal");
                 }
             }
         });
     }
 
-    private void deleteDialog() {
-        Goal goal = table.getSelectionModel().getSelectedItem();
-        if (goal == null) {
-            alert(Alert.AlertType.WARNING, "Warning", "Select goal");
-            return;
-        }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + goal.getGoalName() + "?",
-            ButtonType.OK, ButtonType.CANCEL);
-        if (confirm.showAndWait().get() == ButtonType.OK) {
-            if (dao.deleteGoal(goal.getId())) {
-                alert(Alert.AlertType.INFORMATION, "Success", "Deleted");
-                refresh();
-            } else {
-                alert(Alert.AlertType.ERROR, "Error", "Failed");
-            }
-        }
-    }
-
-    private void alert(Alert.AlertType type, String title, String msg) {
-        Alert a = new Alert(type);
-        a.setTitle(title);
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.showAndWait();
+    private void showMessage(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public VBox getView() {
-        return view;
+        return mainContainer;
     }
 }

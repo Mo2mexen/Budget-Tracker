@@ -3,27 +3,32 @@ package gui;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import database.UserDAO;
 import models.User;
 
 public class LoginView {
-    private Stage stage;
-    private UserDAO userDAO = new UserDAO();
+    private Stage primaryStage;
+    private UserDAO userDAO;
 
-    public LoginView(Stage stage) {
-        this.stage = stage;
+    public LoginView(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        this.userDAO = new UserDAO();
     }
 
     public Scene createScene() {
-        VBox root = new VBox(15);
-        root.setAlignment(Pos.CENTER);
-        root.setPadding(new Insets(20));
+        VBox mainContainer = new VBox(15);
+        mainContainer.setAlignment(Pos.CENTER);
+        mainContainer.setPadding(new Insets(20));
 
-        Label title = new Label("Budget Tracker");
-        title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
+        Label titleLabel = new Label("Budget Tracker");
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
         TextField usernameField = new TextField();
         usernameField.setPromptText("Username");
@@ -33,39 +38,44 @@ public class LoginView {
         passwordField.setPromptText("Password");
         passwordField.setMaxWidth(300);
 
-        Label msgLabel = new Label();
+        Label messageLabel = new Label();
 
-        Button loginBtn = new Button("Login");
-        loginBtn.setPrefWidth(145);
-        loginBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
-        loginBtn.setOnAction(e -> {
+        Button loginButton = new Button("Login");
+        loginButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        loginButton.setPrefWidth(145);
+        loginButton.setOnAction(event -> {
             String username = usernameField.getText().trim();
             String password = passwordField.getText();
+
             if (username.isEmpty() || password.isEmpty()) {
-                msgLabel.setText("Fill all fields");
-                msgLabel.setStyle("-fx-text-fill: red;");
+                messageLabel.setText("Please fill all fields");
                 return;
             }
+
             User user = userDAO.login(username, password);
+
             if (user != null) {
-                stage.setScene(new DashboardView(stage, user).createScene());
+                primaryStage.setScene(new DashboardView(primaryStage, user).createScene());
             } else {
-                msgLabel.setText("Invalid credentials");
-                msgLabel.setStyle("-fx-text-fill: red;");
+                messageLabel.setText("Invalid username or password");
             }
         });
 
-        Button registerBtn = new Button("Register");
-        registerBtn.setPrefWidth(145);
-        registerBtn.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
-        registerBtn.setOnAction(e -> stage.setScene(new RegisterView(stage).createScene()));
+        Button registerButton = new Button("Register");
+        registerButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        registerButton.setPrefWidth(145);
+        registerButton.setOnAction(event -> {
+            primaryStage.setScene(new RegisterView(primaryStage).createScene());
+        });
 
-        HBox btnBox = new HBox(10, loginBtn, registerBtn);
-        btnBox.setAlignment(Pos.CENTER);
+        HBox buttonContainer = new HBox(10, loginButton, registerButton);
+        buttonContainer.setAlignment(Pos.CENTER);
 
-        passwordField.setOnAction(e -> loginBtn.fire());
+        // Allow pressing Enter to login
+        passwordField.setOnAction(event -> loginButton.fire());
 
-        root.getChildren().addAll(title, usernameField, passwordField, btnBox, msgLabel);
-        return new Scene(root, 800, 600);
+        mainContainer.getChildren().addAll(titleLabel, usernameField, passwordField, buttonContainer, messageLabel);
+
+        return new Scene(mainContainer, 800, 600);
     }
 }

@@ -9,7 +9,10 @@
       "Bash(powershell:*)",
       "Bash(ls:*)",
       "Bash(javac:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(run-gui.bat)",
+      "Bash(grep:*)",
+      "Bash(compile.bat)"
     ]
   }
 }

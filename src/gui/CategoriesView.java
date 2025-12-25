@@ -1,7 +1,6 @@
 package gui;
 
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
@@ -12,198 +11,198 @@ import database.CategoryDAO;
 
 public class CategoriesView {
     private User user;
-    private CategoryDAO dao = new CategoryDAO();
-    private TableView<Category> table = new TableView<>();
-    private VBox view;
+    private CategoryDAO categoryDAO;
+    private TableView<Category> categoriesTable;
+    private VBox mainContainer;
 
     public CategoriesView(User user) {
         this.user = user;
-        this.view = create();
+        this.categoryDAO = new CategoryDAO();
+        this.categoriesTable = new TableView<>();
+        this.mainContainer = createView();
     }
 
-    private VBox create() {
-        VBox v = new VBox(15);
-        v.setPadding(new Insets(20));
+    private VBox createView() {
+        VBox container = new VBox(10);
+        container.setPadding(new Insets(10));
 
-        Label title = new Label("Categories");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        // Title
+        Label titleLabel = new Label("Categories");
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        HBox btns = new HBox(10);
-        btns.setAlignment(Pos.CENTER_LEFT);
-        btns.getChildren().addAll(
-            createBtn("Add", "#27ae60", e -> addDialog()),
-            createBtn("Edit", "#3498db", e -> editDialog()),
-            createBtn("Delete", "#e74c3c", e -> deleteDialog()),
-            createBtn("Refresh", "#95a5a6", e -> refresh())
-        );
+        // Create buttons
+        Button addButton = new Button("Add");
+        addButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        Button editButton = new Button("Edit");
+        editButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+        Button deleteButton = new Button("Delete");
+        deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
+        Button refreshButton = new Button("Refresh");
+        refreshButton.setStyle("-fx-background-color: #9E9E9E; -fx-text-fill: white;");
 
-        TableColumn<Category, Integer> idCol = new TableColumn<>("ID");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setPrefWidth(50);
+        addButton.setOnAction(event -> addCategory());
+        editButton.setOnAction(event -> editCategory());
+        deleteButton.setOnAction(event -> deleteCategory());
+        refreshButton.setOnAction(event -> loadCategories());
 
-        TableColumn<Category, String> nameCol = new TableColumn<>("Name");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
-        nameCol.setPrefWidth(200);
+        HBox buttonBox = new HBox(5);
+        buttonBox.getChildren().addAll(addButton, editButton, deleteButton, refreshButton);
 
-        TableColumn<Category, CategoryType> typeCol = new TableColumn<>("Type");
-        typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
-        typeCol.setPrefWidth(120);
+        // Create table columns
+        TableColumn<Category, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        TableColumn<Category, String> colorCol = new TableColumn<>("Color");
-        colorCol.setCellValueFactory(new PropertyValueFactory<>("color"));
-        colorCol.setPrefWidth(100);
+        TableColumn<Category, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
 
-        TableColumn<Category, String> iconCol = new TableColumn<>("Icon");
-        iconCol.setCellValueFactory(new PropertyValueFactory<>("icon"));
-        iconCol.setPrefWidth(80);
+        TableColumn<Category, CategoryType> typeColumn = new TableColumn<>("Type");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
-        table.getColumns().addAll(idCol, nameCol, typeCol, colorCol, iconCol);
-        refresh();
+        categoriesTable.getColumns().addAll(idColumn, nameColumn, typeColumn);
+        loadCategories();
 
-        v.getChildren().addAll(title, btns, table);
-        return v;
+        container.getChildren().addAll(titleLabel, buttonBox, categoriesTable);
+        return container;
     }
 
-    private Button createBtn(String text, String color, javafx.event.EventHandler<javafx.event.ActionEvent> action) {
-        Button btn = new Button(text);
-        btn.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white;");
-        btn.setOnAction(action);
-        return btn;
+    private void loadCategories() {
+        categoriesTable.getItems().clear();
+        categoriesTable.getItems().addAll(categoryDAO.getUserCategories(user.getId()));
     }
 
-    private void refresh() {
-        table.getItems().clear();
-        table.getItems().addAll(dao.getUserCategories(user.getId()));
-    }
+    private void addCategory() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add Category");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-    private void addDialog() {
-        Dialog<ButtonType> dlg = new Dialog<>();
-        dlg.setTitle("Add Category");
-        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
+        VBox dialogBox = new VBox(5);
+        dialogBox.setPadding(new Insets(10));
 
         TextField nameField = new TextField();
-        ComboBox<CategoryType> typeCombo = new ComboBox<>();
-        typeCombo.getItems().addAll(CategoryType.values());
-        typeCombo.setValue(CategoryType.EXPENSE);
-        TextField colorField = new TextField("#FF5722");
-        TextField iconField = new TextField("💰");
 
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Type:"), 0, 1);
-        grid.add(typeCombo, 1, 1);
-        grid.add(new Label("Color:"), 0, 2);
-        grid.add(colorField, 1, 2);
-        grid.add(new Label("Icon:"), 0, 3);
-        grid.add(iconField, 1, 3);
+        ComboBox<CategoryType> typeBox = new ComboBox<>();
+        typeBox.getItems().addAll(CategoryType.values());
+        typeBox.setValue(CategoryType.EXPENSE);
 
-        dlg.getDialogPane().setContent(grid);
+        dialogBox.getChildren().addAll(
+            new Label("Name:"), nameField,
+            new Label("Type:"), typeBox
+        );
 
-        dlg.showAndWait().ifPresent(r -> {
-            if (r == ButtonType.OK) {
-                String name = nameField.getText().trim();
-                if (name.isEmpty()) {
-                    alert(Alert.AlertType.ERROR, "Error", "Name required");
+        dialog.getDialogPane().setContent(dialogBox);
+
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                String categoryName = nameField.getText().trim();
+
+                if (categoryName.isEmpty()) {
+                    showMessage("Error", "Name is required");
                     return;
                 }
-                if (dao.createCategory(user.getId(), name, typeCombo.getValue().name(),
-                    colorField.getText().trim(), iconField.getText().trim())) {
-                    alert(Alert.AlertType.INFORMATION, "Success", "Category created");
-                    refresh();
+
+                String type = typeBox.getValue().name();
+                boolean success = categoryDAO.createCategory(user.getId(), categoryName, type, "", "");
+
+                if (success) {
+                    showMessage("Success", "Category created");
+                    loadCategories();
                 } else {
-                    alert(Alert.AlertType.ERROR, "Error", "Failed");
+                    showMessage("Error", "Failed to create category");
                 }
             }
         });
     }
 
-    private void editDialog() {
-        Category cat = table.getSelectionModel().getSelectedItem();
-        if (cat == null) {
-            alert(Alert.AlertType.WARNING, "Warning", "Select category");
-            return;
-        }
-        if (cat.isDefault()) {
-            alert(Alert.AlertType.WARNING, "Warning", "Cannot edit default");
+    private void editCategory() {
+        Category selectedCategory = categoriesTable.getSelectionModel().getSelectedItem();
+
+        if (selectedCategory == null) {
+            showMessage("Warning", "Please select a category");
             return;
         }
 
-        Dialog<ButtonType> dlg = new Dialog<>();
-        dlg.setTitle("Edit Category");
-        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        if (selectedCategory.isDefault()) {
+            showMessage("Warning", "Cannot edit default category");
+            return;
+        }
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Edit Category");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        TextField nameField = new TextField(cat.getCategoryName());
-        TextField colorField = new TextField(cat.getColor());
-        TextField iconField = new TextField(cat.getIcon());
+        VBox dialogBox = new VBox(5);
+        dialogBox.setPadding(new Insets(10));
 
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Color:"), 0, 1);
-        grid.add(colorField, 1, 1);
-        grid.add(new Label("Icon:"), 0, 2);
-        grid.add(iconField, 1, 2);
+        TextField nameField = new TextField(selectedCategory.getCategoryName());
 
-        dlg.getDialogPane().setContent(grid);
+        dialogBox.getChildren().addAll(
+            new Label("Name:"), nameField
+        );
 
-        dlg.showAndWait().ifPresent(r -> {
-            if (r == ButtonType.OK) {
-                String name = nameField.getText().trim();
-                if (name.isEmpty()) {
-                    alert(Alert.AlertType.ERROR, "Error", "Name required");
+        dialog.getDialogPane().setContent(dialogBox);
+
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                String categoryName = nameField.getText().trim();
+
+                if (categoryName.isEmpty()) {
+                    showMessage("Error", "Name is required");
                     return;
                 }
-                if (dao.updateCategory(cat.getId(), name, colorField.getText().trim(), iconField.getText().trim())) {
-                    alert(Alert.AlertType.INFORMATION, "Success", "Updated");
-                    refresh();
+
+                boolean success = categoryDAO.updateCategory(selectedCategory.getId(), categoryName, "", "");
+
+                if (success) {
+                    showMessage("Success", "Category updated");
+                    loadCategories();
                 } else {
-                    alert(Alert.AlertType.ERROR, "Error", "Failed");
+                    showMessage("Error", "Failed to update category");
                 }
             }
         });
     }
 
-    private void deleteDialog() {
-        Category cat = table.getSelectionModel().getSelectedItem();
-        if (cat == null) {
-            alert(Alert.AlertType.WARNING, "Warning", "Select category");
-            return;
-        }
-        if (cat.isDefault()) {
-            alert(Alert.AlertType.WARNING, "Warning", "Cannot delete default");
+    private void deleteCategory() {
+        Category selectedCategory = categoriesTable.getSelectionModel().getSelectedItem();
+
+        if (selectedCategory == null) {
+            showMessage("Warning", "Please select a category");
             return;
         }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + cat.getCategoryName() + "?",
-            ButtonType.OK, ButtonType.CANCEL);
-        if (confirm.showAndWait().get() == ButtonType.OK) {
-            if (dao.deleteCategory(cat.getId())) {
-                alert(Alert.AlertType.INFORMATION, "Success", "Deleted");
-                refresh();
-            } else {
-                alert(Alert.AlertType.ERROR, "Error", "Failed");
-            }
+        if (selectedCategory.isDefault()) {
+            showMessage("Warning", "Cannot delete default category");
+            return;
         }
+
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Confirm");
+        confirmDialog.setHeaderText(null);
+        confirmDialog.setContentText("Delete category: " + selectedCategory.getCategoryName() + "?");
+
+        confirmDialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                boolean success = categoryDAO.deleteCategory(selectedCategory.getId());
+
+                if (success) {
+                    showMessage("Success", "Category deleted");
+                    loadCategories();
+                } else {
+                    showMessage("Error", "Failed to delete category");
+                }
+            }
+        });
     }
 
-    private void alert(Alert.AlertType type, String title, String msg) {
-        Alert a = new Alert(type);
-        a.setTitle(title);
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.showAndWait();
+    private void showMessage(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public VBox getView() {
-        return view;
+        return mainContainer;
     }
 }
