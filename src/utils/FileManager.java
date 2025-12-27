@@ -8,11 +8,6 @@ import models.*;
 
 public class FileManager {
 
-    // Create reports folder when program starts
-    static {
-        new File("reports").mkdirs();
-    }
-
     // Ensure reports folder exists
     private static void ensureReportsFolder() {
         File reportsDir = new File("reports");

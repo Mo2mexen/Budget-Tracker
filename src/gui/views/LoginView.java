@@ -1,4 +1,4 @@
-package gui;
+package gui.views;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,16 +10,17 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import database.UserDAO;
-import models.User;
 
 public class LoginView {
     private Stage primaryStage;
-    private UserDAO userDAO;
+    private TextField usernameField;
+    private PasswordField passwordField;
+    private Label messageLabel;
+    private Button loginButton;
+    private Button registerButton;
 
     public LoginView(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        this.userDAO = new UserDAO();
     }
 
     public Scene createScene() {
@@ -30,43 +31,24 @@ public class LoginView {
         Label titleLabel = new Label("Budget Tracker");
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        TextField usernameField = new TextField();
+        usernameField = new TextField();
         usernameField.setPromptText("Username");
         usernameField.setMaxWidth(300);
 
-        PasswordField passwordField = new PasswordField();
+        passwordField = new PasswordField();
         passwordField.setPromptText("Password");
         passwordField.setMaxWidth(300);
 
-        Label messageLabel = new Label();
+        messageLabel = new Label();
 
-        Button loginButton = new Button("Login");
+        loginButton = new Button("Login");
         loginButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
         loginButton.setPrefWidth(145);
-        loginButton.setOnAction(event -> {
-            String username = usernameField.getText().trim();
-            String password = passwordField.getText();
+        
 
-            if (username.isEmpty() || password.isEmpty()) {
-                messageLabel.setText("Please fill all fields");
-                return;
-            }
-
-            User user = userDAO.login(username, password);
-
-            if (user != null) {
-                primaryStage.setScene(new DashboardView(primaryStage, user).createScene());
-            } else {
-                messageLabel.setText("Invalid username or password");
-            }
-        });
-
-        Button registerButton = new Button("Register");
+        registerButton = new Button("Register");
         registerButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
         registerButton.setPrefWidth(145);
-        registerButton.setOnAction(event -> {
-            primaryStage.setScene(new RegisterView(primaryStage).createScene());
-        });
 
         HBox buttonContainer = new HBox(10, loginButton, registerButton);
         buttonContainer.setAlignment(Pos.CENTER);
@@ -77,5 +59,30 @@ public class LoginView {
         mainContainer.getChildren().addAll(titleLabel, usernameField, passwordField, buttonContainer, messageLabel);
 
         return new Scene(mainContainer, 800, 600);
+    }
+
+    // Getters for controller
+    public Stage getPrimaryStage() {
+        return primaryStage;
+    }
+
+    public TextField getUsernameField() {
+        return usernameField;
+    }
+
+    public PasswordField getPasswordField() {
+        return passwordField;
+    }
+
+    public Label getMessageLabel() {
+        return messageLabel;
+    }
+
+    public Button getLoginButton() {
+        return loginButton;
+    }
+
+    public Button getRegisterButton() {
+        return registerButton;
     }
 }

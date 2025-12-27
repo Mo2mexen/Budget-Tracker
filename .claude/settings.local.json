@@ -12,7 +12,11 @@
       "Bash(wc:*)",
       "Bash(run-gui.bat)",
       "Bash(grep:*)",
-      "Bash(compile.bat)"
+      "Bash(compile.bat)",
+      "Bash(cmd /c compile.bat)",
+      "Bash(git checkout:*)",
+      "Bash(del:*)",
+      "Bash(cmd /c run-gui.bat)"
     ]
   }
 }

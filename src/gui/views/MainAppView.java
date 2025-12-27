@@ -1,4 +1,4 @@
-package gui;
+package gui.views;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -8,12 +8,20 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import models.User;
 
-public class DashboardView {
+public class MainAppView {
     private Stage stage;
     private User user;
     private BorderPane rootPane;
+    private Button accountsButton;
+    private Button categoriesButton;
+    private Button transactionsButton;
+    private Button budgetsButton;
+    private Button goalsButton;
+    private Button reportsButton;
+    private Button profileButton;
+    private Button logoutButton;
 
-    public DashboardView(Stage stage, User user) {
+    public MainAppView(Stage stage, User user) {
         this.stage = stage;
         this.user = user;
     }
@@ -29,7 +37,7 @@ public class DashboardView {
 
         rootPane.setLeft(menuContainer);
         rootPane.setTop(topPanel);
-        rootPane.setCenter(createMainContent());
+        // Default view will be set by controller
 
         return new Scene(rootPane, 1000, 700);
     }
@@ -43,67 +51,52 @@ public class DashboardView {
         menuTitleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         menuContainer.getChildren().addAll(menuTitleLabel, new Separator());
 
-        // Dashboard button
-        Button dashboardButton = new Button("Dashboard");
-        dashboardButton.setPrefWidth(180);
-        dashboardButton.setAlignment(Pos.CENTER_LEFT);
-        dashboardButton.setOnAction(event -> rootPane.setCenter(createMainContent()));
-
         // Accounts button
-        Button accountsButton = new Button("Accounts");
+        accountsButton = new Button("Accounts");
         accountsButton.setPrefWidth(180);
         accountsButton.setAlignment(Pos.CENTER_LEFT);
-        accountsButton.setOnAction(event -> rootPane.setCenter(new AccountsView(user).getView()));
 
         // Categories button
-        Button categoriesButton = new Button("Categories");
+        categoriesButton = new Button("Categories");
         categoriesButton.setPrefWidth(180);
         categoriesButton.setAlignment(Pos.CENTER_LEFT);
-        categoriesButton.setOnAction(event -> rootPane.setCenter(new CategoriesView(user).getView()));
 
         // Transactions button
-        Button transactionsButton = new Button("Transactions");
+        transactionsButton = new Button("Transactions");
         transactionsButton.setPrefWidth(180);
         transactionsButton.setAlignment(Pos.CENTER_LEFT);
-        transactionsButton.setOnAction(event -> rootPane.setCenter(new TransactionsView(user).getView()));
 
         // Budgets button
-        Button budgetsButton = new Button("Budgets");
+        budgetsButton = new Button("Budgets");
         budgetsButton.setPrefWidth(180);
         budgetsButton.setAlignment(Pos.CENTER_LEFT);
-        budgetsButton.setOnAction(event -> rootPane.setCenter(new BudgetsView(user).getView()));
 
         // Goals button
-        Button goalsButton = new Button("Goals");
+        goalsButton = new Button("Goals");
         goalsButton.setPrefWidth(180);
         goalsButton.setAlignment(Pos.CENTER_LEFT);
-        goalsButton.setOnAction(event -> rootPane.setCenter(new GoalsView(user).getView()));
 
         // Reports button
-        Button reportsButton = new Button("Reports");
+        reportsButton = new Button("Reports");
         reportsButton.setPrefWidth(180);
         reportsButton.setAlignment(Pos.CENTER_LEFT);
-        reportsButton.setOnAction(event -> rootPane.setCenter(new ReportsView(user).getView()));
 
         // Profile button
-        Button profileButton = new Button("Profile");
+        profileButton = new Button("Profile");
         profileButton.setPrefWidth(180);
         profileButton.setAlignment(Pos.CENTER_LEFT);
-        profileButton.setOnAction(event -> rootPane.setCenter(new ProfileView(user).getView()));
 
         // Spacer
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
         // Logout button
-        Button logoutButton = new Button("Logout");
+        logoutButton = new Button("Logout");
         logoutButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
         logoutButton.setPrefWidth(180);
         logoutButton.setAlignment(Pos.CENTER_LEFT);
-        logoutButton.setOnAction(event -> handleLogout());
 
         menuContainer.getChildren().addAll(
-            dashboardButton,
             accountsButton,
             categoriesButton,
             transactionsButton,
@@ -131,24 +124,48 @@ public class DashboardView {
         return topPanel;
     }
 
-    private VBox createMainContent() {
-        VBox mainContent = new VBox(20);
-        mainContent.setPadding(new Insets(20));
-
-        Label titleLabel = new Label("Dashboard");
-        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
-
-        Label simpleWelcomeLabel = new Label("Welcome to your Budget Tracker");
-
-        mainContent.getChildren().addAll(titleLabel, simpleWelcomeLabel);
-
-        return mainContent;
+    // Getters for controller
+    public Stage getStage() {
+        return stage;
     }
 
-    private void handleLogout() {
-        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION, "Logout?", ButtonType.OK, ButtonType.CANCEL);
-        if (confirmDialog.showAndWait().get() == ButtonType.OK) {
-            stage.setScene(new LoginView(stage).createScene());
-        }
+    public User getUser() {
+        return user;
+    }
+
+    public BorderPane getRootPane() {
+        return rootPane;
+    }
+
+    public Button getAccountsButton() {
+        return accountsButton;
+    }
+
+    public Button getCategoriesButton() {
+        return categoriesButton;
+    }
+
+    public Button getTransactionsButton() {
+        return transactionsButton;
+    }
+
+    public Button getBudgetsButton() {
+        return budgetsButton;
+    }
+
+    public Button getGoalsButton() {
+        return goalsButton;
+    }
+
+    public Button getReportsButton() {
+        return reportsButton;
+    }
+
+    public Button getProfileButton() {
+        return profileButton;
+    }
+
+    public Button getLogoutButton() {
+        return logoutButton;
     }
 }

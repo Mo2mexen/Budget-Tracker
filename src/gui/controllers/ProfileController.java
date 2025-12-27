@@ -1,93 +1,30 @@
-package gui;
+package gui.controllers;
 
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import models.User;
+import javafx.scene.layout.GridPane;
 import database.UserDAO;
+import models.User;
+import gui.views.ProfileView;
 
-public class ProfileView {
-    private User user;
+public class ProfileController {
+    private ProfileView view;
     private UserDAO userDAO;
-    private VBox mainView;
 
-    public ProfileView(User user) {
-        this.user = user;
+    public ProfileController(ProfileView view) {
+        this.view = view;
         this.userDAO = new UserDAO();
-        this.mainView = createView();
+        attachEventHandlers();
     }
 
-    private VBox createView() {
-        VBox container = new VBox(20);
-        container.setPadding(new Insets(20));
-        container.setAlignment(Pos.TOP_CENTER);
-
-        Label titleLabel = new Label("Profile");
-        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
-
-        GridPane profileGrid = new GridPane();
-        profileGrid.setHgap(15);
-        profileGrid.setVgap(15);
-        profileGrid.setAlignment(Pos.CENTER);
-
-        // ID row
-        Label idLabel = new Label("ID:");
-        Label idValueLabel = new Label(String.valueOf(user.getId()));
-        profileGrid.add(idLabel, 0, 0);
-        profileGrid.add(idValueLabel, 1, 0);
-
-        // Username row
-        Label usernameLabel = new Label("Username:");
-        Label usernameValueLabel = new Label(user.getUsername());
-        profileGrid.add(usernameLabel, 0, 1);
-        profileGrid.add(usernameValueLabel, 1, 1);
-
-        // Full Name row
-        Label fullNameLabel = new Label("Name:");
-        Label fullNameValueLabel = new Label(user.getFullName());
-        profileGrid.add(fullNameLabel, 0, 2);
-        profileGrid.add(fullNameValueLabel, 1, 2);
-
-        // Email row
-        Label emailLabel = new Label("Email:");
-        Label emailValueLabel = new Label(user.getEmail());
-        profileGrid.add(emailLabel, 0, 3);
-        profileGrid.add(emailValueLabel, 1, 3);
-
-        // Currency row
-        Label currencyLabel = new Label("Currency:");
-        Label currencyValueLabel = new Label(user.getCurrency());
-        profileGrid.add(currencyLabel, 0, 4);
-        profileGrid.add(currencyValueLabel, 1, 4);
-
-        // Created date row
-        Label createdLabel = new Label("Created:");
-        Label createdValueLabel = new Label(user.getCreatedDate().toString());
-        profileGrid.add(createdLabel, 0, 5);
-        profileGrid.add(createdValueLabel, 1, 5);
-
-        // Edit button
-        Button editProfileButton = new Button("Edit Profile");
-        editProfileButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
-        editProfileButton.setPrefWidth(180);
-        editProfileButton.setOnAction(event -> openEditDialog());
-
-        // Change password button
-        Button changePasswordButton = new Button("Change Password");
-        changePasswordButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
-        changePasswordButton.setPrefWidth(180);
-        changePasswordButton.setOnAction(event -> openPasswordDialog());
-
-        HBox buttonBox = new HBox(15);
-        buttonBox.setAlignment(Pos.CENTER);
-        buttonBox.getChildren().addAll(editProfileButton, changePasswordButton);
-
-        container.getChildren().addAll(titleLabel, profileGrid, buttonBox);
-        return container;
+    private void attachEventHandlers() {
+        view.getEditProfileButton().setOnAction(event -> openEditDialog());
+        view.getChangePasswordButton().setOnAction(event -> openPasswordDialog());
     }
 
     private void openEditDialog() {
+        User user = view.getUser();
+
         Dialog<ButtonType> editDialog = new Dialog<>();
         editDialog.setTitle("Edit Profile");
         editDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -131,7 +68,7 @@ public class ProfileView {
 
                 if (userDAO.updateUser(user)) {
                     showMessage("Success", "Profile updated");
-                    this.mainView = createView();
+                    view.refreshView();
                 } else {
                     showMessage("Error", "Failed to update profile");
                 }
@@ -140,6 +77,8 @@ public class ProfileView {
     }
 
     private void openPasswordDialog() {
+        User user = view.getUser();
+
         Dialog<ButtonType> passwordDialog = new Dialog<>();
         passwordDialog.setTitle("Change Password");
         passwordDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -195,9 +134,5 @@ public class ProfileView {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    public VBox getView() {
-        return mainView;
     }
 }

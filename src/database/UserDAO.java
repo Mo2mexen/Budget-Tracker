@@ -111,40 +111,64 @@ public class UserDAO {
 
     public static boolean deleteUser(int userId) {
         try (Connection conn = DatabaseConnection.getConnection()) {
-            try (PreparedStatement stmt1 = conn.prepareStatement("DELETE FROM transactions WHERE user_id = ?")) {
-                stmt1.setInt(1, userId);
-                stmt1.executeUpdate();
-            }
-
-            try (PreparedStatement stmt2 = conn.prepareStatement("DELETE FROM budgets WHERE user_id = ?")) {
-                stmt2.setInt(1, userId);
-                stmt2.executeUpdate();
-            }
-
-            try (PreparedStatement stmt3 = conn.prepareStatement("DELETE FROM goals WHERE user_id = ?")) {
-                stmt3.setInt(1, userId);
-                stmt3.executeUpdate();
-            }
-
-            try (PreparedStatement stmt4 = conn.prepareStatement("DELETE FROM accounts WHERE user_id = ?")) {
-                stmt4.setInt(1, userId);
-                stmt4.executeUpdate();
-            }
-
-            try (PreparedStatement stmt5 = conn.prepareStatement("DELETE FROM categories WHERE user_id = ?")) {
-                stmt5.setInt(1, userId);
-                stmt5.executeUpdate();
-            }
-
-            try (PreparedStatement stmt6 = conn.prepareStatement("DELETE FROM users WHERE id = ?")) {
-                stmt6.setInt(1, userId);
-                stmt6.executeUpdate();
-            }
-
+            deleteUserTransactions(conn, userId);
+            deleteUserBudgets(conn, userId);
+            deleteUserGoals(conn, userId);
+            deleteUserAccounts(conn, userId);
+            deleteUserCategories(conn, userId);
+            deleteUserRecord(conn, userId);
             return true;
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
             return false;
+        }
+    }
+
+    private static void deleteUserTransactions(Connection conn, int userId) throws SQLException {
+        String sql = "DELETE FROM transactions WHERE user_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
+    }
+
+    private static void deleteUserBudgets(Connection conn, int userId) throws SQLException {
+        String sql = "DELETE FROM budgets WHERE user_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
+    }
+
+    private static void deleteUserGoals(Connection conn, int userId) throws SQLException {
+        String sql = "DELETE FROM goals WHERE user_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
+    }
+
+    private static void deleteUserAccounts(Connection conn, int userId) throws SQLException {
+        String sql = "DELETE FROM accounts WHERE user_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
+    }
+
+    private static void deleteUserCategories(Connection conn, int userId) throws SQLException {
+        String sql = "DELETE FROM categories WHERE user_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
+    }
+
+    private static void deleteUserRecord(Connection conn, int userId) throws SQLException {
+        String sql = "DELETE FROM users WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
         }
     }
 }

@@ -41,18 +41,30 @@ Budget-Tracker/
 │   │   └── sample_data.sql
 │   ├── utils/                     # Utility classes
 │   │   └── FileManager.java       # CSV export functionality
-│   ├── gui/                       # JavaFX GUI components
+│   ├── gui/                       # JavaFX GUI components (MVC Pattern)
 │   │   ├── BudgetTrackerApp.java  # GUI entry point
-│   │   ├── LoginView.java
-│   │   ├── RegisterView.java
-│   │   ├── DashboardView.java
-│   │   ├── AccountsView.java
-│   │   ├── CategoriesView.java
-│   │   ├── TransactionsView.java
-│   │   ├── BudgetsView.java
-│   │   ├── GoalsView.java
-│   │   ├── ReportsView.java
-│   │   └── ProfileView.java
+│   │   ├── views/                 # View layer (UI only)
+│   │   │   ├── AccountsView.java
+│   │   │   ├── BudgetsView.java
+│   │   │   ├── CategoriesView.java
+│   │   │   ├── GoalsView.java
+│   │   │   ├── LoginView.java
+│   │   │   ├── MainAppView.java
+│   │   │   ├── ProfileView.java
+│   │   │   ├── RegisterView.java
+│   │   │   ├── ReportsView.java
+│   │   │   └── TransactionsView.java
+│   │   └── controllers/           # Controller layer (Event handling)
+│   │       ├── AccountsController.java
+│   │       ├── BudgetsController.java
+│   │       ├── CategoriesController.java
+│   │       ├── GoalsController.java
+│   │       ├── LoginController.java
+│   │       ├── MainAppController.java
+│   │       ├── ProfileController.java
+│   │       ├── RegisterController.java
+│   │       ├── ReportsController.java
+│   │       └── TransactionsController.java
 │   └── lib/                       # External libraries
 │       ├── mysql-connector-j-9.1.0.jar
 │       └── javafx-sdk-23.0.1/
@@ -74,23 +86,37 @@ Budget-Tracker/
 - Multi-currency support
 - Password management
 
+## Application Architecture
+
+```
+BudgetTrackerApp (Entry Point - launches app)
+    ↓
+LoginView (First screen)
+    ↓
+MainAppView (Main Frame - contains everything after login)
+    ↓ (switches between)
+    ├── ProfileView
+    ├── AccountsView
+    ├── CategoriesView
+    ├── TransactionsView
+    ├── BudgetsView
+    ├── GoalsView
+    └── ReportsView
+```
+
 ## User Interfaces
 
 ### CLI (Command Line Interface)
 Console-based interface for terminal users.
 
-**Run using:** `run.bat`
 
 ### GUI (Graphical User Interface)
 Full-featured JavaFX desktop application with:
-- Dashboard with financial overview
 - Navigation menu for easy access
 - CRUD operations for all entities
 - Color-coded budget status indicators
 - User profile management
 - Data export to CSV
-
-**Run using:** `run-gui.bat`
 
 ## Notes
 
