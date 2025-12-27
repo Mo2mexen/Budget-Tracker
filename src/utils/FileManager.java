@@ -4,6 +4,7 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.ArrayList;
 import models.*;
 
 public class FileManager {
@@ -53,7 +54,7 @@ public class FileManager {
         String fileName = "reports/transactions_" + getDate() + ".csv";
         String header = "Date,Description,Amount,Type,Notes";
 
-        List<String> rows = new java.util.ArrayList<>();
+        List<String> rows = new ArrayList<>();
         for (Transaction t : list) {
             String row = fixText(t.getTransactionDate().toString()) + "," +
                         fixText(t.getDescription()) + "," +
@@ -71,7 +72,7 @@ public class FileManager {
         String fileName = "reports/budgets_" + getDate() + ".csv";
         String header = "Month,Year,Limit,Spent,Status";
 
-        List<String> rows = new java.util.ArrayList<>();
+        List<String> rows = new ArrayList<>();
         for (Budget b : list) {
             String row = b.getMonth() + "," +
                         b.getYear() + "," +
@@ -89,7 +90,7 @@ public class FileManager {
         String fileName = "reports/goals_" + getDate() + ".csv";
         String header = "Name,Target,Current,Progress,Deadline";
 
-        List<String> rows = new java.util.ArrayList<>();
+        List<String> rows = new ArrayList<>();
         for (Goal g : list) {
             String row = fixText(g.getGoalName()) + "," +
                         g.getTargetAmount() + "," +
