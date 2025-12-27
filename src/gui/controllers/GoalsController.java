@@ -26,6 +26,11 @@ public class GoalsController {
         view.getEditButton().setOnAction(event -> editGoal());
         view.getDeleteButton().setOnAction(event -> deleteGoal());
         view.getRefreshButton().setOnAction(event -> loadGoals());
+        view.getGoalsTable().setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                addContribution();
+            }
+        });
     }
 
     private void loadGoals() {
@@ -115,6 +120,75 @@ public class GoalsController {
             }
         } catch (Exception exception) {
             showMessage("Error", "Invalid input");
+        }
+    }
+
+    private void addContribution() {
+        Goal selectedGoal = view.getGoalsTable().getSelectionModel().getSelectedItem();
+        if (selectedGoal == null) {
+            showMessage("Warning", "Please select a goal");
+            return;
+        }
+
+        if (selectedGoal.getStatus() != GoalStatus.ACTIVE) {
+            showMessage("Warning", "Cannot contribute to inactive goal");
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add Contribution to: " + selectedGoal.getGoalName());
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        VBox dialogBox = new VBox(10);
+        dialogBox.setPadding(new Insets(10));
+
+        Label progressLabel = new Label(String.format("Current: $%.2f / $%.2f (%.1f%%)",
+            selectedGoal.getCurrentAmount(),
+            selectedGoal.getTargetAmount(),
+            selectedGoal.calculatePercentage()));
+
+        TextField amountField = new TextField();
+        amountField.setPromptText("Enter contribution amount");
+
+        dialogBox.getChildren().addAll(
+            progressLabel,
+            new Label("Contribution Amount:"),
+            amountField
+        );
+
+        dialog.getDialogPane().setContent(dialogBox);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (!result.isPresent() || result.get() != ButtonType.OK) {
+            return;
+        }
+
+        try {
+            double contribution = Double.parseDouble(amountField.getText().trim());
+
+            if (contribution <= 0) {
+                showMessage("Error", "Amount must be greater than 0");
+                return;
+            }
+
+            double newAmount = selectedGoal.getCurrentAmount() + contribution;
+
+            boolean success = goalDAO.updateProgress(selectedGoal.getId(), newAmount);
+
+            if (success) {
+                if (newAmount >= selectedGoal.getTargetAmount()) {
+                    goalDAO.updateStatus(selectedGoal.getId(), "COMPLETED");
+                    showMessage("Success", String.format("Goal completed! Added $%.2f", contribution));
+                } else {
+                    showMessage("Success", String.format("Added $%.2f. New total: $%.2f",
+                        contribution, newAmount));
+                }
+                loadGoals();
+            } else {
+                showMessage("Error", "Failed to add contribution");
+            }
+        } catch (NumberFormatException e) {
+            showMessage("Error", "Invalid amount");
         }
     }
 

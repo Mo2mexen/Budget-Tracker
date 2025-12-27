@@ -15,7 +15,7 @@ public class Transaction extends BaseEntity implements Displayable {
     private String notes;
 
     public enum TransactionType {
-        INCOME, EXPENSE, TRANSFER
+        INCOME, EXPENSE
     }
 
     public Transaction(int id, int userId, int accountId, int categoryId, double amount,
