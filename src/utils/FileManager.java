@@ -13,6 +13,14 @@ public class FileManager {
         new File("reports").mkdirs();
     }
 
+    // Ensure reports folder exists
+    private static void ensureReportsFolder() {
+        File reportsDir = new File("reports");
+        if (!reportsDir.exists()) {
+            reportsDir.mkdirs();
+        }
+    }
+
     // Get today's date
     private static String getDate() {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy"));
@@ -30,6 +38,8 @@ public class FileManager {
     // Write data to CSV file
     private static String writeCSV(String fileName, String header, List<String> rows) {
         try {
+            ensureReportsFolder();
+
             PrintWriter writer = new PrintWriter(new FileWriter(fileName));
             writer.println(header);
             for (String row : rows) {
@@ -100,8 +110,10 @@ public class FileManager {
     // Export all data (transactions, budgets, goals) to a single CSV file
     public static String exportAllData(List<Transaction> transactions, List<Budget> budgets, List<Goal> goals) {
         String fileName = "reports/complete_report_" + getDate() + ".csv";
-        
+
         try {
+            ensureReportsFolder();
+
             PrintWriter writer = new PrintWriter(new FileWriter(fileName));
             
             // Write transactions section
