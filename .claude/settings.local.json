@@ -16,7 +16,11 @@
       "Bash(cmd /c compile.bat)",
       "Bash(git checkout:*)",
       "Bash(del:*)",
-      "Bash(cmd /c run-gui.bat)"
+      "Bash(cmd /c run-gui.bat)",
+      "Bash(mysql:*)",
+      "Bash(if [ -d \"bin\" ])",
+      "Bash(then rm -rf bin)",
+      "Bash(fi)"
     ]
   }
 }

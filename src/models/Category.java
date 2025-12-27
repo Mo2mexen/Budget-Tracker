@@ -3,20 +3,16 @@ package models;
 public class Category extends BaseEntity implements Displayable {
     private String categoryName;
     private CategoryType type;
-    private String color;
-    private String icon;
     private boolean isDefault;
 
     public enum CategoryType {
         INCOME, EXPENSE
     }
 
-    public Category(int id, int userId, String categoryName, CategoryType type, String color, String icon, boolean isDefault) {
+    public Category(int id, int userId, String categoryName, CategoryType type, boolean isDefault) {
         super(id, userId);
         this.categoryName = categoryName;
         this.type = type;
-        this.color = color;
-        this.icon = icon;
         this.isDefault = isDefault;
     }
 
@@ -30,13 +26,13 @@ public class Category extends BaseEntity implements Displayable {
 
     @Override
     public String getDisplayInfo() {
-        return icon + " " + categoryName + " (" + type + ")";
+        return categoryName + " (" + type + ")";
     }
 
     @Override
     public String getFormattedDisplay() {
-        return String.format("%s %s [%s] - %s",
-                icon, categoryName, type, isDefault ? "Default" : "Custom");
+        return String.format("%s [%s] - %s",
+                categoryName, type, isDefault ? "Default" : "Custom");
     }
 
     @Override
@@ -44,8 +40,6 @@ public class Category extends BaseEntity implements Displayable {
         System.out.println("Category Details:");
         System.out.println("Name: " + categoryName);
         System.out.println("Type: " + type);
-        System.out.println("Icon: " + icon);
-        System.out.println("Color: " + color);
         System.out.println("Default: " + (isDefault ? "Yes" : "No"));
         System.out.println("Created: " + getCreatedDate());
     }
@@ -66,22 +60,6 @@ public class Category extends BaseEntity implements Displayable {
         this.type = type;
     }
 
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
     public boolean isDefault() {
         return isDefault;
     }
@@ -92,6 +70,6 @@ public class Category extends BaseEntity implements Displayable {
 
     @Override
     public String toString() {
-        return icon + " " + categoryName + " (" + type + ")";
+        return categoryName + " (" + type + ")";
     }
 }

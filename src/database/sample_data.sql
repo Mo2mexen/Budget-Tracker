@@ -14,14 +14,14 @@ INSERT INTO users (username, password, email, full_name, currency, created_date)
 VALUES ('john_doe', 'password123', 'john@example.com', 'John Doe', 'USD', '2024-01-01');
 
 -- Create default categories for this user
-INSERT INTO categories (user_id, category_name, type, color, icon, is_default) VALUES
-(1, 'Salary', 'INCOME', '#4CAF50', '💼', TRUE),
-(1, 'Business', 'INCOME', '#8BC34A', '💰', TRUE),
-(1, 'Food', 'EXPENSE', '#FF5722', '🍔', TRUE),
-(1, 'Transport', 'EXPENSE', '#2196F3', '🚗', TRUE),
-(1, 'Shopping', 'EXPENSE', '#E91E63', '🛍️', TRUE),
-(1, 'Entertainment', 'EXPENSE', '#9C27B0', '🎬', TRUE),
-(1, 'Bills', 'EXPENSE', '#FF9800', '📄', TRUE);
+INSERT INTO categories (user_id, category_name, type, is_default) VALUES
+(1, 'Salary', 'INCOME', TRUE),
+(1, 'Business', 'INCOME', TRUE),
+(1, 'Food', 'EXPENSE', TRUE),
+(1, 'Transport', 'EXPENSE', TRUE),
+(1, 'Shopping', 'EXPENSE', TRUE),
+(1, 'Entertainment', 'EXPENSE', TRUE),
+(1, 'Bills', 'EXPENSE', TRUE);
 
 -- Create accounts
 INSERT INTO accounts (user_id, account_name, account_type, balance, currency, created_date) VALUES

@@ -50,7 +50,7 @@ public class CategoriesController {
         }
 
         ComboBox<CategoryType> typeBox = (ComboBox<CategoryType>) content.getChildren().get(3);
-        boolean success = categoryDAO.createCategory(view.getUser().getId(), categoryName, typeBox.getValue().name(), "", "");
+        boolean success = categoryDAO.createCategory(view.getUser().getId(), categoryName, typeBox.getValue().name());
 
         if (success) {
             showMessage("Success", "Category created");
@@ -88,7 +88,7 @@ public class CategoriesController {
             return;
         }
 
-        boolean success = categoryDAO.updateCategory(selectedCategory.getId(), categoryName, "", "");
+        boolean success = categoryDAO.updateCategory(selectedCategory.getId(), categoryName);
         if (success) {
             showMessage("Success", "Category updated");
             loadCategories();

@@ -26,8 +26,6 @@ CREATE TABLE categories (
     user_id INT NOT NULL,
     category_name VARCHAR(50) NOT NULL,
     type VARCHAR(20) NOT NULL,
-    color VARCHAR(20),
-    icon VARCHAR(10),
     is_default BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_categories_user_id (user_id)

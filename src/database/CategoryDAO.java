@@ -7,16 +7,14 @@ import java.util.List;
 
 public class CategoryDAO {
 
-    public static boolean createCategory(int userId, String name, String type, String color, String icon) {
-        String sql = "INSERT INTO categories (user_id, category_name, type, color, icon, is_default) " +
-                    "VALUES (?, ?, ?, ?, ?, false)";
+    public static boolean createCategory(int userId, String name, String type) {
+        String sql = "INSERT INTO categories (user_id, category_name, type, is_default) " +
+                    "VALUES (?, ?, ?, false)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
             stmt.setString(2, name);
             stmt.setString(3, type);
-            stmt.setString(4, color);
-            stmt.setString(5, icon);
             stmt.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -36,7 +34,7 @@ public class CategoryDAO {
                 Category c = new Category(
                     rs.getInt("id"), rs.getInt("user_id"), rs.getString("category_name"),
                     Category.CategoryType.valueOf(rs.getString("type")),
-                    rs.getString("color"), rs.getString("icon"), rs.getBoolean("is_default")
+                    rs.getBoolean("is_default")
                 );
                 list.add(c);
             }
@@ -58,7 +56,7 @@ public class CategoryDAO {
                 Category c = new Category(
                     rs.getInt("id"), rs.getInt("user_id"), rs.getString("category_name"),
                     Category.CategoryType.valueOf(rs.getString("type")),
-                    rs.getString("color"), rs.getString("icon"), rs.getBoolean("is_default")
+                    rs.getBoolean("is_default")
                 );
                 list.add(c);
             }
@@ -78,7 +76,7 @@ public class CategoryDAO {
                 Category c = new Category(
                     rs.getInt("id"), rs.getInt("user_id"), rs.getString("category_name"),
                     Category.CategoryType.valueOf(rs.getString("type")),
-                    rs.getString("color"), rs.getString("icon"), rs.getBoolean("is_default")
+                    rs.getBoolean("is_default")
                 );
                 return c;
             }
@@ -89,14 +87,12 @@ public class CategoryDAO {
         }
     }
 
-    public static boolean updateCategory(int categoryId, String name, String color, String icon) {
-        String sql = "UPDATE categories SET category_name = ?, color = ?, icon = ? WHERE id = ?";
+    public static boolean updateCategory(int categoryId, String name) {
+        String sql = "UPDATE categories SET category_name = ? WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name);
-            stmt.setString(2, color);
-            stmt.setString(3, icon);
-            stmt.setInt(4, categoryId);
+            stmt.setInt(2, categoryId);
             stmt.executeUpdate();
             return true;
         } catch (SQLException e) {
