@@ -163,22 +163,4 @@ public class FileManager {
             return null;
         }
     }
-
-    // Open file in default program
-    public static boolean openFile(String filePath) {
-        try {
-            File file = new File(filePath);
-            if (!file.exists()) {
-                System.out.println("File not found: " + filePath);
-                return false;
-            }
-
-            java.awt.Desktop.getDesktop().open(file);
-            return true;
-
-        } catch (Exception e) {
-            System.out.println("Could not open file: " + e.getMessage());
-            return false;
-        }
-    }
 }

@@ -278,7 +278,9 @@ public class Main {
                 }
                 String transFilePath = FileManager.exportTransactions(transactions);
                 if (transFilePath != null) {
-                    promptToOpenFile(transFilePath, "transactions");
+                    System.out.println("Exported transactions to: " + transFilePath);
+                } else {
+                    System.out.println("Failed to export transactions");
                 }
                 break;
 
@@ -289,7 +291,9 @@ public class Main {
                 }
                 String budgetFilePath = FileManager.exportBudgets(budgets);
                 if (budgetFilePath != null) {
-                    promptToOpenFile(budgetFilePath, "budgets");
+                    System.out.println("Exported budgets to: " + budgetFilePath);
+                } else {
+                    System.out.println("Failed to export budgets");
                 }
                 break;
 
@@ -300,7 +304,9 @@ public class Main {
                 }
                 String goalFilePath = FileManager.exportGoals(goals);
                 if (goalFilePath != null) {
-                    promptToOpenFile(goalFilePath, "goals");
+                    System.out.println("Exported goals to: " + goalFilePath);
+                } else {
+                    System.out.println("Failed to export goals");
                 }
                 break;
 
@@ -314,7 +320,7 @@ public class Main {
 
                 String allFilePath = FileManager.exportAllData(allTransactions, budgets, goals);
                 if (allFilePath != null) {
-                    promptToOpenFile(allFilePath, "all data report");
+                    System.out.println("Exported all data to: " + allFilePath);
                 } else {
                     System.out.println("Failed to export data");
                 }
@@ -325,15 +331,6 @@ public class Main {
 
             default:
                 System.out.println("Invalid choice");
-        }
-    }
-
-    private static void promptToOpenFile(String filePath, String dataType) {
-        System.out.println("Exported " + dataType + " to: " + filePath);
-        System.out.print("Open file? (y/n): ");
-        String open = scanner.nextLine();
-        if (open.equalsIgnoreCase("y")) {
-            FileManager.openFile(filePath);
         }
     }
 
