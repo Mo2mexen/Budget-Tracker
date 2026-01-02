@@ -9,6 +9,7 @@ import database.GoalDAO;
 import java.time.LocalDate;
 import java.util.Optional;
 import gui.views.GoalsView;
+import utils.ValidationHelper;
 
 public class GoalsController {
     private GoalsView view;
@@ -55,14 +56,33 @@ public class GoalsController {
             return;
         }
 
+        // Validate goal name length
+        if (!ValidationHelper.isValidString(goalName, ValidationHelper.MIN_NAME_LENGTH, ValidationHelper.MAX_NAME_LENGTH)) {
+            showMessage("Error", ValidationHelper.getStringLengthErrorMessage("Goal name", ValidationHelper.MIN_NAME_LENGTH, ValidationHelper.MAX_NAME_LENGTH));
+            return;
+        }
+
         try {
             TextField targetField = (TextField) content.getChildren().get(3);
             DatePicker deadlinePicker = (DatePicker) content.getChildren().get(5);
 
             double targetAmount = Double.parseDouble(targetField.getText().trim());
 
-            if (targetAmount <= 0) {
-                showMessage("Error", "Target must be greater than 0");
+            // Validate target amount
+            if (!ValidationHelper.isValidAmount(targetAmount)) {
+                showMessage("Error", ValidationHelper.getAmountErrorMessage());
+                return;
+            }
+
+            // Validate deadline is not null
+            if (!ValidationHelper.isValidDate(deadlinePicker.getValue())) {
+                showMessage("Error", "Please select a deadline date");
+                return;
+            }
+
+            // Validate deadline is not in the past
+            if (!ValidationHelper.isNotInPast(deadlinePicker.getValue())) {
+                showMessage("Error", ValidationHelper.getPastDateErrorMessage());
                 return;
             }
 
@@ -102,12 +122,30 @@ public class GoalsController {
             return;
         }
 
+        // Validate goal name length
+        if (!ValidationHelper.isValidString(goalName, ValidationHelper.MIN_NAME_LENGTH, ValidationHelper.MAX_NAME_LENGTH)) {
+            showMessage("Error", ValidationHelper.getStringLengthErrorMessage("Goal name", ValidationHelper.MIN_NAME_LENGTH, ValidationHelper.MAX_NAME_LENGTH));
+            return;
+        }
+
         try {
             TextField targetField = (TextField) content.getChildren().get(3);
             DatePicker deadlinePicker = (DatePicker) content.getChildren().get(5);
             ComboBox<GoalStatus> statusBox = (ComboBox<GoalStatus>) content.getChildren().get(7);
 
             double targetAmount = Double.parseDouble(targetField.getText().trim());
+
+            // Validate target amount
+            if (!ValidationHelper.isValidAmount(targetAmount)) {
+                showMessage("Error", ValidationHelper.getAmountErrorMessage());
+                return;
+            }
+
+            // Validate deadline is not null
+            if (!ValidationHelper.isValidDate(deadlinePicker.getValue())) {
+                showMessage("Error", "Please select a deadline date");
+                return;
+            }
 
             boolean success = goalDAO.updateGoal(selectedGoal.getId(), goalName, targetAmount, deadlinePicker.getValue());
 
@@ -168,6 +206,12 @@ public class GoalsController {
 
             if (contribution <= 0) {
                 showMessage("Error", "Amount must be greater than 0");
+                return;
+            }
+
+            // Validate contribution amount
+            if (!ValidationHelper.isValidAmount(contribution)) {
+                showMessage("Error", ValidationHelper.getAmountErrorMessage());
                 return;
             }
 

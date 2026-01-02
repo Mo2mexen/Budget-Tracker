@@ -8,6 +8,7 @@ import models.Account.AccountType;
 import database.AccountDAO;
 import gui.views.AccountsView;
 import java.util.Optional;
+import utils.ValidationHelper;
 
 public class AccountsController {
     private AccountsView view;
@@ -49,12 +50,40 @@ public class AccountsController {
             return;
         }
 
+        // Validate account name length
+        if (!ValidationHelper.isValidString(accountName, ValidationHelper.MIN_ACCOUNT_NAME_LENGTH, ValidationHelper.MAX_ACCOUNT_NAME_LENGTH)) {
+            showMessage("Error", ValidationHelper.getStringLengthErrorMessage("Account name", ValidationHelper.MIN_ACCOUNT_NAME_LENGTH, ValidationHelper.MAX_ACCOUNT_NAME_LENGTH));
+            return;
+        }
+
         try {
             ComboBox<AccountType> typeBox = (ComboBox<AccountType>) content.getChildren().get(3);
             TextField balanceField = (TextField) content.getChildren().get(5);
             ComboBox<String> currencyBox = (ComboBox<String>) content.getChildren().get(7);
 
+            // Validate type and currency are not null
+            if (typeBox.getValue() == null) {
+                showMessage("Error", "Please select account type");
+                return;
+            }
+
+            if (currencyBox.getValue() == null) {
+                showMessage("Error", "Please select currency");
+                return;
+            }
+
             double balance = Double.parseDouble(balanceField.getText().trim());
+
+            // Validate balance based on account type
+            if (!ValidationHelper.isValidAccountBalance(balance, typeBox.getValue().name())) {
+                if (typeBox.getValue() == AccountType.CREDIT_CARD) {
+                    showMessage("Error", "Balance must be between -$" + ValidationHelper.MAX_AMOUNT + " and $" + ValidationHelper.MAX_AMOUNT);
+                } else {
+                    showMessage("Error", "Balance must be between $0 and $" + ValidationHelper.MAX_AMOUNT);
+                }
+                return;
+            }
+
             boolean success = accountDAO.createAccount(view.getUser().getId(), accountName, typeBox.getValue().name(), balance, currencyBox.getValue());
 
             if (success) {
@@ -91,12 +120,40 @@ public class AccountsController {
             return;
         }
 
+        // Validate account name length
+        if (!ValidationHelper.isValidString(accountName, ValidationHelper.MIN_ACCOUNT_NAME_LENGTH, ValidationHelper.MAX_ACCOUNT_NAME_LENGTH)) {
+            showMessage("Error", ValidationHelper.getStringLengthErrorMessage("Account name", ValidationHelper.MIN_ACCOUNT_NAME_LENGTH, ValidationHelper.MAX_ACCOUNT_NAME_LENGTH));
+            return;
+        }
+
         try {
             ComboBox<AccountType> typeBox = (ComboBox<AccountType>) content.getChildren().get(3);
             TextField balanceField = (TextField) content.getChildren().get(5);
             ComboBox<String> currencyBox = (ComboBox<String>) content.getChildren().get(7);
 
+            // Validate type and currency are not null
+            if (typeBox.getValue() == null) {
+                showMessage("Error", "Please select account type");
+                return;
+            }
+
+            if (currencyBox.getValue() == null) {
+                showMessage("Error", "Please select currency");
+                return;
+            }
+
             double balance = Double.parseDouble(balanceField.getText().trim());
+
+            // Validate balance based on account type
+            if (!ValidationHelper.isValidAccountBalance(balance, typeBox.getValue().name())) {
+                if (typeBox.getValue() == AccountType.CREDIT_CARD) {
+                    showMessage("Error", "Balance must be between -$" + ValidationHelper.MAX_AMOUNT + " and $" + ValidationHelper.MAX_AMOUNT);
+                } else {
+                    showMessage("Error", "Balance must be between $0 and $" + ValidationHelper.MAX_AMOUNT);
+                }
+                return;
+            }
+
             boolean success = accountDAO.updateAccount(selectedAccount.getId(), accountName, typeBox.getValue().name(), currencyBox.getValue());
 
             if (success) {

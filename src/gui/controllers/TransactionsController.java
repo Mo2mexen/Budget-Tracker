@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import gui.views.TransactionsView;
+import utils.ValidationHelper;
 
 public class TransactionsController {
     private TransactionsView view;
@@ -69,6 +70,12 @@ public class TransactionsController {
             return;
         }
 
+        // Validate description length
+        if (!ValidationHelper.isValidString(description, ValidationHelper.MIN_DESCRIPTION_LENGTH, ValidationHelper.MAX_DESCRIPTION_LENGTH)) {
+            showMessage("Error", ValidationHelper.getStringLengthErrorMessage("Description", ValidationHelper.MIN_DESCRIPTION_LENGTH, ValidationHelper.MAX_DESCRIPTION_LENGTH));
+            return;
+        }
+
         try {
             TextField amountField = getTextField(content, 5);
             DatePicker datePicker = getDatePicker(content, 9);
@@ -76,6 +83,33 @@ public class TransactionsController {
             TextArea notesArea = getTextArea(content, 13);
 
             double amount = Double.parseDouble(amountField.getText().trim());
+
+            // Validate amount
+            if (!ValidationHelper.isValidAmount(amount)) {
+                showMessage("Error", ValidationHelper.getAmountErrorMessage());
+                return;
+            }
+
+            // Validate date is not null
+            if (!ValidationHelper.isValidDate(datePicker.getValue())) {
+                showMessage("Error", "Please select a valid date");
+                return;
+            }
+
+            // Validate date is not too far in future
+            if (!ValidationHelper.isNotTooFarInFuture(datePicker.getValue())) {
+                showMessage("Error", ValidationHelper.getFutureDateErrorMessage());
+                return;
+            }
+
+            // Check account balance for EXPENSE transactions
+            if (typeBox.getValue() == TransactionType.EXPENSE) {
+                Account selectedAccount = accountBox.getValue();
+                if (selectedAccount != null && selectedAccount.getBalance() < amount) {
+                    showMessage("Error", "Insufficient funds. Account balance: " + selectedAccount.getFormattedBalance());
+                    return;
+                }
+            }
             boolean success = transactionDAO.addTransaction(
                 view.getUser().getId(),
                 accountBox.getValue().getId(),
@@ -123,6 +157,12 @@ public class TransactionsController {
             return;
         }
 
+        // Validate description length
+        if (!ValidationHelper.isValidString(description, ValidationHelper.MIN_DESCRIPTION_LENGTH, ValidationHelper.MAX_DESCRIPTION_LENGTH)) {
+            showMessage("Error", ValidationHelper.getStringLengthErrorMessage("Description", ValidationHelper.MIN_DESCRIPTION_LENGTH, ValidationHelper.MAX_DESCRIPTION_LENGTH));
+            return;
+        }
+
         try {
             ComboBox<Account> accountBox = getComboBox(content, 1);
             ComboBox<Category> categoryBox = getComboBox(content, 3);
@@ -132,6 +172,24 @@ public class TransactionsController {
             TextArea notesArea = getTextArea(content, 13);
 
             double amount = Double.parseDouble(amountField.getText().trim());
+
+            // Validate amount
+            if (!ValidationHelper.isValidAmount(amount)) {
+                showMessage("Error", ValidationHelper.getAmountErrorMessage());
+                return;
+            }
+
+            // Validate date is not null
+            if (!ValidationHelper.isValidDate(datePicker.getValue())) {
+                showMessage("Error", "Please select a valid date");
+                return;
+            }
+
+            // Validate date is not too far in future
+            if (!ValidationHelper.isNotTooFarInFuture(datePicker.getValue())) {
+                showMessage("Error", ValidationHelper.getFutureDateErrorMessage());
+                return;
+            }
             boolean success = transactionDAO.updateTransaction(
                 selectedTransaction.getId(),
                 accountBox.getValue().getId(),

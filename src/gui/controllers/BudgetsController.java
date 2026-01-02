@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import gui.views.BudgetsView;
+import utils.ValidationHelper;
 
 public class BudgetsController {
     private BudgetsView view;
@@ -64,6 +65,24 @@ public class BudgetsController {
             int month = Integer.parseInt(monthField.getText().trim());
             int year = Integer.parseInt(yearField.getText().trim());
 
+            // Validate limit
+            if (!ValidationHelper.isValidAmount(limit)) {
+                showMessage("Error", ValidationHelper.getAmountErrorMessage());
+                return;
+            }
+
+            // Validate month
+            if (!ValidationHelper.isValidMonth(month)) {
+                showMessage("Error", ValidationHelper.getMonthErrorMessage());
+                return;
+            }
+
+            // Validate year
+            if (!ValidationHelper.isValidYear(year)) {
+                showMessage("Error", ValidationHelper.getYearErrorMessage());
+                return;
+            }
+
             boolean success = budgetDAO.createBudget(view.getUser().getId(), categoryBox.getValue().getId(), limit, month, year);
 
             if (success) {
@@ -95,6 +114,12 @@ public class BudgetsController {
             VBox content = (VBox) dialog.getDialogPane().getContent();
             TextField limitField = (TextField) content.getChildren().get(1);
             double limit = Double.parseDouble(limitField.getText().trim());
+
+            // Validate limit
+            if (!ValidationHelper.isValidAmount(limit)) {
+                showMessage("Error", ValidationHelper.getAmountErrorMessage());
+                return;
+            }
 
             boolean success = budgetDAO.updateBudget(selectedBudget.getId(), limit);
 

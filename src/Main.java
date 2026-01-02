@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Scanner;
 import models.*;
 import utils.FileManager;
+import utils.ValidationHelper;
 
 public class Main {
 
@@ -69,15 +70,45 @@ public class Main {
     private static void createAccount() {
         System.out.println("\n--- CREATE ACCOUNT ---");
         System.out.print("Username: ");
-        String username = scanner.nextLine();
+        String username = scanner.nextLine().trim();
         System.out.print("Password: ");
         String password = scanner.nextLine();
         System.out.print("Email: ");
-        String email = scanner.nextLine();
+        String email = scanner.nextLine().trim();
         System.out.print("Full Name: ");
-        String fullName = scanner.nextLine();
-        System.out.print("Currency (USD, EUR, etc.): ");
-        String currency = scanner.nextLine();
+        String fullName = scanner.nextLine().trim();
+        System.out.print("Currency (USD, EUR, EGP): ");
+        String currency = scanner.nextLine().trim().toUpperCase();
+
+        // Validate username
+        if (!ValidationHelper.isValidUsername(username)) {
+            System.out.println("Error: " + ValidationHelper.getStringLengthErrorMessage("Username", ValidationHelper.MIN_USERNAME_LENGTH, ValidationHelper.MAX_USERNAME_LENGTH));
+            return;
+        }
+
+        // Validate password
+        if (!ValidationHelper.isValidPassword(password)) {
+            System.out.println("Error: " + ValidationHelper.getPasswordErrorMessage());
+            return;
+        }
+
+        // Validate email
+        if (!ValidationHelper.isValidEmail(email)) {
+            System.out.println("Error: " + ValidationHelper.getEmailErrorMessage());
+            return;
+        }
+
+        // Validate full name
+        if (!ValidationHelper.isValidString(fullName, ValidationHelper.MIN_NAME_LENGTH, ValidationHelper.MAX_NAME_LENGTH)) {
+            System.out.println("Error: " + ValidationHelper.getStringLengthErrorMessage("Full name", ValidationHelper.MIN_NAME_LENGTH, ValidationHelper.MAX_NAME_LENGTH));
+            return;
+        }
+
+        // Validate currency
+        if (!ValidationHelper.isValidCurrency(currency)) {
+            System.out.println("Error: Invalid currency. Please use USD, EUR, or EGP");
+            return;
+        }
 
         if (UserDAO.createUser(username, password, email, fullName, currency)) {
             System.out.println("Account created successfully");
@@ -141,13 +172,31 @@ public class Main {
     private static void addTransaction() {
         System.out.println("\n--- ADD TRANSACTION ---");
         System.out.print("Description: ");
-        String description = scanner.nextLine();
+        String description = scanner.nextLine().trim();
         System.out.print("Amount: ");
         double amount = getDouble();
         System.out.print("Type (INCOME/EXPENSE): ");
-        String type = scanner.nextLine().toUpperCase();
+        String type = scanner.nextLine().trim().toUpperCase();
         System.out.print("Notes: ");
-        String notes = scanner.nextLine();
+        String notes = scanner.nextLine().trim();
+
+        // Validate description
+        if (!ValidationHelper.isValidString(description, ValidationHelper.MIN_DESCRIPTION_LENGTH, ValidationHelper.MAX_DESCRIPTION_LENGTH)) {
+            System.out.println("Error: " + ValidationHelper.getStringLengthErrorMessage("Description", ValidationHelper.MIN_DESCRIPTION_LENGTH, ValidationHelper.MAX_DESCRIPTION_LENGTH));
+            return;
+        }
+
+        // Validate amount
+        if (!ValidationHelper.isValidAmount(amount)) {
+            System.out.println("Error: " + ValidationHelper.getAmountErrorMessage());
+            return;
+        }
+
+        // Validate transaction type
+        if (!ValidationHelper.isValidTransactionType(type)) {
+            System.out.println("Error: Type must be INCOME or EXPENSE");
+            return;
+        }
 
         boolean success = TransactionDAO.addTransaction(
             currentUser.getId(), DEFAULT_ACCOUNT_ID, DEFAULT_CATEGORY_ID, amount, description,
@@ -177,13 +226,18 @@ public class Main {
         System.out.println("\n--- MONTHLY REPORT ---");
         System.out.print("Month (1-12): ");
         int month = getInt();
-        while (month < 1 || month > 12) {
-            System.out.println("Invalid month! Please enter a number between 1 and 12.");
+        while (!ValidationHelper.isValidMonth(month)) {
+            System.out.println("Error: " + ValidationHelper.getMonthErrorMessage());
             System.out.print("Month (1-12): ");
             month = getInt();
         }
         System.out.print("Year: ");
         int year = getInt();
+        while (!ValidationHelper.isValidYear(year)) {
+            System.out.println("Error: " + ValidationHelper.getYearErrorMessage());
+            System.out.print("Year: ");
+            year = getInt();
+        }
 
         List<Transaction> transactions = TransactionDAO.getTransactionsByMonth(
             currentUser.getId(), month, year
@@ -335,20 +389,36 @@ public class Main {
     }
 
     private static int getInt() {
-        try {
-            return Integer.parseInt(scanner.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid number! Please try again.");
-            return -1;
+        while (true) {
+            try {
+                String input = scanner.nextLine().trim();
+                if (input.isEmpty()) {
+                    System.out.println("Invalid number! Please enter a valid integer.");
+                    System.out.print("Try again: ");
+                    continue;
+                }
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number! Please enter a valid integer.");
+                System.out.print("Try again: ");
+            }
         }
     }
 
     private static double getDouble() {
-        try {
-            return Double.parseDouble(scanner.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid number! Please try again.");
-            return 0.0;
+        while (true) {
+            try {
+                String input = scanner.nextLine().trim();
+                if (input.isEmpty()) {
+                    System.out.println("Invalid number! Please enter a valid number.");
+                    System.out.print("Try again: ");
+                    continue;
+                }
+                return Double.parseDouble(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number! Please enter a valid number.");
+                System.out.print("Try again: ");
+            }
         }
     }
 }
